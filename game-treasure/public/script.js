@@ -1,4 +1,4 @@
-// Xử lý trang chủ
+// ==================== Module 1: Trang chủ và âm thanh ====================
 document.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('start-btn');
   const homeBtn = document.getElementById('home-btn');
@@ -145,15 +145,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// ==================== Module 2: Quản lý bảng xếp hạng ====================
 function closeLeaderboard() {
   document.getElementById('leaderboard').classList.remove('show');
   document.getElementById('leaderboard-overlay').classList.remove('show');
 }
 
+// ==================== Module 3: Trạng thái trò chơi và biến toàn cục ====================
 let startTime = 0;
 let gameCompleted = false;
 let playerCount = parseInt(localStorage.getItem('playerCount')) || 0;
 
+// Chuyển đổi thời gian từ chuỗi mm:ss sang mili giây để so sánh và lưu điểm.
 function parseTimeString(timeStr) {
   if (!timeStr || typeof timeStr !== 'string') return 0;
   const parts = timeStr.split(':').map(part => parseInt(part, 10));
@@ -161,6 +164,7 @@ function parseTimeString(timeStr) {
   return parts[0] * 60000 + parts[1] * 1000;
 }
 
+// Chuẩn hóa một bản ghi leaderboard để đảm bảo dữ liệu luôn có định dạng nhất quán.
 function normalizeLeaderboardEntry(entry) {
   const score = Number(entry.score) || 0;
   const timeMs = typeof entry.timeMs === 'number' ? entry.timeMs : parseTimeString(entry.time);
@@ -188,6 +192,7 @@ function dedupeLeaderboard(leaderboard) {
 }
 
 // Hàm quản lý Leaderboard
+// Đọc dữ liệu leaderboard từ localStorage và làm sạch các bản ghi trùng lặp.
 function getLeaderboard() {
   const data = localStorage.getItem('leaderboard');
   const leaderboard = data ? JSON.parse(data) : [];
@@ -198,6 +203,7 @@ function getLeaderboard() {
   return cleaned;
 }
 
+// Lưu kết quả mới vào bảng xếp hạng nếu tên người chơi chưa tồn tại.
 function saveScore(playerName, score, timeMs) {
   let leaderboard = getLeaderboard();
   
@@ -248,6 +254,7 @@ function displayLeaderboard() {
   });
 }
 
+// Lưu tên người chơi khi hoàn thành trò chơi và cập nhật bảng xếp hạng.
 function savePlayerName() {
   const nameInput = document.getElementById('player-name-input');
   let playerName = nameInput.value.trim();
@@ -276,6 +283,7 @@ function savePlayerName() {
   }, 500);
 }
 
+// Bỏ qua nhập tên thì vẫn lưu kết quả bằng tên tự động tạo.
 function skipPlayerName() {
   playerCount++;
   let playerName = 'Player' + playerCount;
@@ -301,7 +309,7 @@ let grid = [];
 let gems = [];
 let enemies = [];
 let lava = [];
-let level = 4;
+let level = 1;
 let score = 0;
 let currentPuzzles = []; 
 let currentPuzzle = {};
@@ -313,6 +321,7 @@ let puzzleRestorePosition = null;
 const tileSize = 50;
 const levelScores = [10, 20, 30, 40]; 
 
+// ==================== Module 4: Tải bản đồ, ảnh và dữ liệu câu đố ====================
 function preload() {
   playerImage = loadImage('data/picture/adventurer.png');
   mummyImage = loadImage('data/picture/mummy.png');
@@ -359,6 +368,7 @@ function initMap(level) {
   });
 }
 
+// Khởi tạo các đối tượng trên bản đồ như gem, kẻ địch, lava và vị trí mục tiêu.
 function initElements() {
   gems = [];
   enemies = [];
@@ -379,6 +389,7 @@ function initElements() {
   }
 }
 
+// Vẽ lại toàn bộ bản đồ và các đối tượng nền theo dữ liệu grid hiện tại.
 function drawMap() {
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[y].length; x++) {
@@ -411,6 +422,7 @@ function drawMap() {
   for (let e of enemies) ellipse(e.x, e.y, 20, 20);
 }
 
+// Vẽ nhân vật chính lên canvas bằng ảnh hoặc hình tròn dự phòng.
 function drawPlayer() {
   if (playerImage) {
     const imgSize = player.size * 2;
@@ -422,6 +434,7 @@ function drawPlayer() {
   }
 }
 
+// Vẽ xác ướp lên canvas và giữ nó luôn ở đúng vị trí tính toán.
 function drawMummy() {
   if (mummyImage) {
     const imgSize = 35;
@@ -433,6 +446,7 @@ function drawMummy() {
   }
 }
 
+// ==================== Module 5: Di chuyển nhân vật và xác ướp ====================
 function keyPressed() {
   let newGridX = player.gridX;
   let newGridY = player.gridY;
@@ -474,6 +488,7 @@ function keyPressed() {
   }
 }
 
+// Di chuyển xác ướp theo hướng gần người chơi nhất, ưu tiên đường thẳng trước.
 function moveMummy() {
   let dx = player.gridX - mummy.gridX;
   let dy = player.gridY - mummy.gridY;
@@ -506,6 +521,7 @@ function moveMummy() {
   }
 }
 
+// Xử lý va chạm giữa người chơi với gem, xác ướp và đích đến.
 function checkCollisions() {
   const decodeScreen = document.getElementById('decode-screen');
   if (decodeScreen && decodeScreen.style.display === 'block') {
@@ -524,7 +540,8 @@ function checkCollisions() {
         updateUI();
         showDecodeScreen();
       } else if (currentPuzzles.length > 0) {
-        const nextPuzzle = currentPuzzles.shift();
+        const randomIndex = Math.floor(Math.random() * currentPuzzles.length);
+        const nextPuzzle = currentPuzzles.splice(randomIndex, 1)[0];
         nextPuzzle.pending = true;
         nextPuzzle.gem = g;
         const newEntry = {
@@ -565,6 +582,7 @@ function checkCollisions() {
   }
 }
 
+// Cập nhật các thông tin hiển thị trên giao diện như level, điểm và câu đố hiện tại.
 function updateUI() {
   document.getElementById('level').innerText = level;
   document.getElementById('score').innerText = score;
@@ -579,6 +597,7 @@ function updateTimer() {
   }
 }
 
+// ==================== Module 6: Giao diện và logic giải câu đố ====================
 let decodeScreen = document.createElement('div');
 decodeScreen.id = 'decode-screen';
 decodeScreen.innerHTML = `
@@ -598,6 +617,7 @@ decodeScreen.innerHTML = `
 document.body.appendChild(decodeScreen);
 decodeScreen.style.display = 'none';
 
+// Hiển thị popup câu đố và tạo chuỗi mã hóa tương ứng với loại cipher đang dùng.
 function showDecodeScreen() {
   if (decodeScreen.style.display === 'block') {
     return;
@@ -616,6 +636,7 @@ function showDecodeScreen() {
   document.getElementById('puzzle-msg').innerText = currentPuzzle.msg;
 }
 
+// Ẩn popup câu đố và reset ô nhập để người chơi có thể tiếp tục di chuyển.
 function hideDecodeScreen() {
   decodeScreen.style.display = 'none';
   // Blur input field để phím mũi tên hoạt động bình thường
@@ -624,7 +645,15 @@ function hideDecodeScreen() {
   window.focus();
 }
 
+// Hủy lời giải câu đố: đưa người chơi quay lại vị trí cũ và trả câu đố về hàng chờ.
 function cancelDecodeScreen() {
+  if (currentPuzzle && currentPuzzle.pending) {
+    currentPuzzles.push(currentPuzzle);
+    pendingPuzzles = pendingPuzzles.filter(entry => entry.puzzle !== currentPuzzle);
+    currentPuzzle.pending = false;
+    currentPuzzle.gem = null;
+  }
+
   if (puzzleRestorePosition) {
     player.gridX = puzzleRestorePosition.gridX;
     player.gridY = puzzleRestorePosition.gridY;
@@ -632,9 +661,12 @@ function cancelDecodeScreen() {
     player.y = player.gridY * tileSize + tileSize / 2;
     moveMummy();
   }
+  currentPuzzle = {};
+  puzzleRestorePosition = null;
   hideDecodeScreen();
 }
 
+// Xác nhận câu trả lời của người chơi và cộng điểm nếu đáp án đúng.
 function submitDecode() {
   let input = document.getElementById('decode-input').value.toLowerCase();
   let cipherType = document.getElementById('cipher-type').value;
@@ -663,6 +695,7 @@ function submitDecode() {
   setTimeout(() => feedback.style.display = 'none', 2000);
 }
 
+// Mã hóa chuỗi bằng Caesar Cipher để tạo câu đố cho người chơi giải.
 function caesarEncode(text, shift) {
   return text.toLowerCase().split('').map(char => {
     if (char.match(/[a-z]/)) {
@@ -672,10 +705,11 @@ function caesarEncode(text, shift) {
   }).join('');
 }
 
+// ==================== Module 7: Tiện ích và màn hình kết thúc ====================
 function resetPuzzles() {
-  currentPuzzles = [...puzzles[level - 1].puzzles]; 
+  currentPuzzles = puzzles[level - 1].puzzles.map(p => ({ ...p }));
   pendingPuzzles = [];
-  currentPuzzle = {}; 
+  currentPuzzle = {};
 }
 
 function formatTime(milliseconds) {
@@ -685,6 +719,7 @@ function formatTime(milliseconds) {
   return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
 }
 
+// Hiển thị màn hình hoàn thành trò chơi và cho phép người chơi nhập tên.
 function showCompleteScreen() {
   let elapsedTime = Date.now() - startTime;
   let timeStr = formatTime(elapsedTime);
@@ -698,6 +733,7 @@ function showCompleteScreen() {
   document.getElementById('player-name-input').focus();
 }
 
+// Hiển thị màn hình thua và báo lại thời gian cũng như điểm số đạt được.
 function showLostScreen() {
   let lostScreen = document.getElementById('lost-screen');
   
