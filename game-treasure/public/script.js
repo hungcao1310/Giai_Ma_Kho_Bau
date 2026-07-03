@@ -485,7 +485,8 @@ function submitDecode() {
   if (cipherType === currentPuzzle.cipher_type && input === currentPuzzle.treasure.toLowerCase()) {
     feedback.innerText = "Thông điệp đã được giải mã thành công! Tiếp tục.";
     score += 10; 
-    hideDecodeScreen(); 
+    hideDecodeScreen();
+    moveMummy(); // Xác ướp bắt đầu di chuyển lại sau khi giải xong
   } else {
     feedback.innerText = "Giải mã thất bại. Hãy chọn thuật toán đúng và nhập chuỗi phù hợp.";
   }
