@@ -472,6 +472,9 @@ function showDecodeScreen() {
 
 function hideDecodeScreen() {
   decodeScreen.style.display = 'none';
+  // Blur input field để phím mũi tên hoạt động bình thường
+  document.getElementById('decode-input').blur();
+  document.getElementById('decode-input').value = '';
 }
 
 function submitDecode() {
