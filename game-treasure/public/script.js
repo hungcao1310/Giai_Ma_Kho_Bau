@@ -228,12 +228,14 @@ let currentPuzzles = [];
 let currentPuzzle = {};
 let puzzles = [];
 let gameOverFlag = false;
+let mummyPauseSteps = 0;
 const tileSize = 50;
 const levelScores = [10, 20, 30, 40]; 
 
 function preload() {
   playerImage = loadImage('data/picture/adventurer.png');
   mummyImage = loadImage('data/picture/mummy.png');
+  wallImage = loadImage('data/picture/wall.png');
   loadJSON('data/puzzles.json', (data) => {
     puzzles = data.levels;
   });
@@ -302,8 +304,13 @@ function drawMap() {
       let posX = x * tileSize;
       let posY = y * tileSize;
       if (grid[y][x] === 'W') {
-        fill(139, 69, 19); 
-        rect(posX, posY, tileSize, tileSize);
+        if (typeof wallImage !== 'undefined' && wallImage) {
+          imageMode(CORNER);
+          image(wallImage, posX, posY, tileSize, tileSize);
+        } else {
+          fill(139, 69, 19); 
+          rect(posX, posY, tileSize, tileSize);
+        }
       } else if (grid[y][x] === 'P') {
         fill(34, 139, 34); 
         rect(posX, posY, tileSize, tileSize);
@@ -362,28 +369,44 @@ function keyPressed() {
     // Xác ướp chỉ di chuyển nếu màn hình giải đố KHÔNG hiển thị
     let decodeScreen = document.getElementById('decode-screen');
     if (decodeScreen && decodeScreen.style.display !== 'block') {
-      moveMummy();
+      if (mummyPauseSteps > 0) {
+        mummyPauseSteps -= 1;
+      } else {
+        moveMummy();
+      }
     }
   }
 }
 
 function moveMummy() {
-  // Xác ướp đi theo nhân vật sử dụng tiến cận ngây ngô lộp
-  let newGridX = mummy.gridX;
-  let newGridY = mummy.gridY;
-  
-  // Tiến cận ngây ngô (simple greedy pathfinding)
-  if (player.gridX < mummy.gridX) newGridX--;
-  else if (player.gridX > mummy.gridX) newGridX++;
-  else if (player.gridY < mummy.gridY) newGridY--;
-  else if (player.gridY > mummy.gridY) newGridY++;
-  
-  // Kiểm tra có thể đi hay không
-  if (grid[newGridY] && grid[newGridY][newGridX] !== 'W') {
-    mummy.gridX = newGridX;
-    mummy.gridY = newGridY;
-    mummy.x = mummy.gridX * tileSize + tileSize / 2;
-    mummy.y = mummy.gridY * tileSize + tileSize / 2;
+  let dx = player.gridX - mummy.gridX;
+  let dy = player.gridY - mummy.gridY;
+  let tryMoves = [];
+
+  // Ưu tiên hướng gần hơn
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    if (dx < 0) tryMoves.push({ x: -1, y: 0 });
+    else if (dx > 0) tryMoves.push({ x: 1, y: 0 });
+    if (dy < 0) tryMoves.push({ x: 0, y: -1 });
+    else if (dy > 0) tryMoves.push({ x: 0, y: 1 });
+  } else {
+    if (dy < 0) tryMoves.push({ x: 0, y: -1 });
+    else if (dy > 0) tryMoves.push({ x: 0, y: 1 });
+    if (dx < 0) tryMoves.push({ x: -1, y: 0 });
+    else if (dx > 0) tryMoves.push({ x: 1, y: 0 });
+  }
+
+  // Nếu hướng chính bị chặn, thử hướng phụ
+  for (let move of tryMoves) {
+    let newGridX = mummy.gridX + move.x;
+    let newGridY = mummy.gridY + move.y;
+    if (grid[newGridY] && grid[newGridY][newGridX] !== 'W') {
+      mummy.gridX = newGridX;
+      mummy.gridY = newGridY;
+      mummy.x = mummy.gridX * tileSize + tileSize / 2;
+      mummy.y = mummy.gridY * tileSize + tileSize / 2;
+      return;
+    }
   }
 }
 
@@ -475,6 +498,7 @@ function hideDecodeScreen() {
   // Blur input field để phím mũi tên hoạt động bình thường
   document.getElementById('decode-input').blur();
   document.getElementById('decode-input').value = '';
+  window.focus();
 }
 
 function submitDecode() {
@@ -489,7 +513,7 @@ function submitDecode() {
     feedback.innerText = "Thông điệp đã được giải mã thành công! Tiếp tục.";
     score += 10; 
     hideDecodeScreen();
-    moveMummy(); // Xác ướp bắt đầu di chuyển lại sau khi giải xong
+    mummyPauseSteps = 2; // Xác ướp đứng im 2 bước của người chơi sau khi giải xong
   } else {
     feedback.innerText = "Giải mã thất bại. Hãy chọn thuật toán đúng và nhập chuỗi phù hợp.";
   }
