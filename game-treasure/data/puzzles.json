@@ -13,7 +13,10 @@
       "puzzles": [
         { "question": "Bí mật của hầm ngầm là gì?", "treasure": "gold", "cipher_type": "caesar" },
         { "question": "Lối vào kho báu ở đâu?", "treasure": "cave", "cipher_type": "caesar" },
-        { "question": "Món đồ quý giá nhất là gì?", "treasure": "jewel", "cipher_type": "caesar" }
+        { "question": "Món đồ quý giá nhất là gì?", "treasure": "jewel", "cipher_type": "caesar" },
+        { "question": "Kho báu được bảo vệ bởi điều gì?", "treasure": "magic", "cipher_type": "caesar" },
+        { "question": "Bản đồ dẫn đến đâu?", "treasure": "island", "cipher_type": "caesar" },
+        { "question": "Vòng tay vàng quý giá là gì?", "treasure": "crown", "cipher_type": "caesar" }
       ]
     },
     {
@@ -29,7 +32,9 @@
       "puzzles": [
         { "question": "Kho báu cuối cùng chứa gì?", "treasure": "treasure", "cipher_type": "aes" },
         { "question": "Bí mật của rương là gì?", "treasure": "ruby", "cipher_type": "aes" },
-        { "question": "Điểm đến cuối cùng là đâu?", "treasure": "temple", "cipher_type": "aes" }
+        { "question": "Điểm đến cuối cùng là đâu?", "treasure": "temple", "cipher_type": "aes" },
+        { "question": "Huyền thoại về kho báu là gì?", "treasure": "legend", "cipher_type": "aes" },
+        { "question": "Thứ quý giá nhất được ẩn giấu là gì?", "treasure": "wealth", "cipher_type": "aes" }
       ]
     }
   ]

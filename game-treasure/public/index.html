@@ -18,6 +18,177 @@
         font-size: 16px; 
         color: #f0f0f0; 
         }
+    #complete-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+    #complete-screen.show {
+      display: flex;
+    }
+    #complete-content {
+      background: white;
+      padding: 40px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    #complete-content h2 {
+      font-size: 2em;
+      color: #667eea;
+      margin-bottom: 20px;
+    }
+    #complete-content p {
+      font-size: 1.2em;
+      margin: 15px 0;
+      color: #333;
+    }
+    #complete-content button {
+      margin-top: 20px;
+      padding: 12px 30px;
+      font-size: 1em;
+      background-color: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #complete-content button:hover {
+      background-color: #5568d3;
+    }
+    #name-input-screen {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      z-index: 2000;
+      display: none;
+    }
+    #name-input-screen.show {
+      display: block;
+    }
+    #name-input-screen h3 {
+      margin-top: 0;
+    }
+    #player-name-input {
+      padding: 8px;
+      font-size: 1em;
+      width: 200px;
+      margin: 10px 0;
+    }
+    #name-input-screen button {
+      margin: 0 5px;
+      padding: 8px 20px;
+      font-size: 1em;
+      background-color: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #name-input-screen button:hover {
+      background-color: #5568d3;
+    }
+    #leaderboard {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 600px;
+      color: #333;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 0 30px rgba(0,0,0,0.5);
+      z-index: 2000;
+    }
+    #leaderboard.show {
+      display: block;
+    }
+    #leaderboard h3 {
+      margin-top: 0;
+      color: #667eea;
+      text-align: center;
+    }
+    #leaderboard table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    #leaderboard th {
+      background-color: #667eea;
+      color: white;
+      padding: 10px;
+      text-align: left;
+    }
+    #leaderboard td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    #leaderboard tr:hover {
+      background-color: #f0f0f0;
+    }
+    #close-leaderboard-btn {
+      display: block;
+      margin: 15px auto 0;
+      padding: 8px 20px;
+      background-color: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #close-leaderboard-btn:hover {
+      background-color: #5568d3;
+    }
+    #leaderboard-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1999;
+    }
+    #leaderboard-overlay.show {
+      display: block;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 40px;
+      justify-content: center;
+    }
+    #leaderboard-btn {
+      padding: 15px 30px;
+      font-size: 1.1em;
+      background-color: #4ecdc4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #leaderboard-btn:hover {
+      background-color: #45b5ad;
+    }
     #game-container {
       flex: 1;
       display: flex;
@@ -65,9 +236,102 @@
     #info-container p {
       line-height: 1.6;
     }
+    #home-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('../data/background.jpg');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    #home-screen h1 {
+      font-size: 3em;
+      color: white;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    #home-screen p {
+      font-size: 1.2em;
+      color: white;
+      text-align: center;
+      max-width: 600px;
+      margin-bottom: 40px;
+    }
+    #start-btn {
+      padding: 15px 50px;
+      font-size: 1.2em;
+      background-color: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #start-btn:hover {
+      background-color: #ff5252;
+    }
+    #game-container {
+      display: none;
+    }
+    #info-container {
+      display: none;
+    }
   </style>
 </head>
 <body>
+  <div id="home-screen">
+    <h1>🏴‍☠️ Giải mã kho báu</h1>
+    <p>Một trò chơi phiêu lưu kết hợp giải đố về mã hóa thông tin. <br> Hãy thu thập gems, giải quyết câu đố và tìm kiếm kho báu!</p>
+    <div class="button-group">
+      <button id="start-btn">Bắt đầu trò chơi</button>
+      <button id="leaderboard-btn">🏆 Bảng xếp hạng</button>
+    </div>
+  </div>
+  <div id="leaderboard-overlay"></div>
+  <div id="leaderboard">
+    <h3>🏆 Bảng xếp hạng cao nhất</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Người chơi</th>
+          <th>Điểm</th>
+          <th>Thời gian</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-body">
+      </tbody>
+    </table>
+    <button id="close-leaderboard-btn">Đóng</button>
+  </div>
+  <div id="name-input-screen">
+    <h2 style="color: #667eea; margin-top: 0;">🎉 Chúc mừng!</h2>
+    <p style="font-size: 1.1em; margin: 15px 0;">Bạn đã hoàn thành trò chơi!</p>
+    <p id="completion-stats" style="font-size: 1em; color: #666;"></p>
+    <p style="font-size: 1em; margin-top: 20px;">Vui lòng nhập tên của bạn</p>
+    <input type="text" id="player-name-input" placeholder="Nhập tên của bạn">
+    <br>
+    <button id="save-name-btn">Lưu</button>
+    <button id="skip-name-btn">Bỏ qua</button>
+  </div>
+  <div id="complete-screen">
+    <div id="complete-content">
+      <h2>🎉 Chúc mừng!</h2>
+      <p>Bạn đã hoàn thành trò chơi!</p>
+      <p id="complete-time">Thời gian: 00:00</p>
+      <p id="complete-score">Tổng điểm: 0</p>
+      <button id="home-btn">Về trang chủ</button>
+    </div>
+  </div>
   <div id="game-container">
     <h1>Giải mã kho báu</h1>
     <div id="game-info">
