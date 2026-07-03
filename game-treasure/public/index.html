@@ -175,6 +175,7 @@
       gap: 10px;
       margin-bottom: 40px;
       justify-content: center;
+      flex-wrap: wrap;
     }
     #leaderboard-btn {
       padding: 15px 30px;
@@ -337,6 +338,8 @@
       <button id="leaderboard-btn">🏆 Bảng xếp hạng</button>
     </div>
   </div>
+  <audio id="theme-song" src="../data/song/theme_song.mp3" loop preload="auto"></audio>
+  <audio id="ingame-song" src="../data/song/ingame_song.mp3" loop preload="auto"></audio>
   <div id="intro-screen">
     <h2>Giới thiệu trò chơi</h2>
     <p>"Giải mã kho báu" là một trò chơi phiêu lưu kết hợp giải đố. Người chơi điều khiển nhân vật thu thập các viên ngọc (gem) để nhận câu đố mã hóa. Mỗi câu đố yêu cầu bạn chọn đúng thuật toán (Caesar, Vigenère, RSA, hoặc AES) và giải mã thông điệp để ghi điểm.</p>

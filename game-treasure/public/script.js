@@ -9,12 +9,86 @@ document.addEventListener('DOMContentLoaded', () => {
   const leaderboardBtn = document.getElementById('leaderboard-btn');
   const closeLeaderboardBtn = document.getElementById('close-leaderboard-btn');
   const leaderboardOverlay = document.getElementById('leaderboard-overlay');
+  const homeScreen = document.getElementById('home-screen');
+  const themeSong = document.getElementById('theme-song');
+  const ingameSong = document.getElementById('ingame-song');
+  let audioStarted = false;
+
+  const stopAllMusic = () => {
+    if (themeSong) {
+      themeSong.pause();
+      themeSong.currentTime = 0;
+    }
+    if (ingameSong) {
+      ingameSong.pause();
+      ingameSong.currentTime = 0;
+    }
+  };
+
+  const attemptPlayThemeSong = async () => {
+    if (!themeSong || audioStarted) return true;
+
+    try {
+      themeSong.load();
+      themeSong.volume = 0.4;
+      themeSong.loop = true;
+      await themeSong.play();
+      if (ingameSong) {
+        ingameSong.pause();
+        ingameSong.currentTime = 0;
+      }
+      audioStarted = true;
+      return true;
+    } catch (error) {
+      audioStarted = false;
+      console.log('Chưa thể phát nhạc ngay lúc này:', error);
+      return false;
+    }
+  };
+
+  const playIngameSong = async () => {
+    if (!ingameSong) return;
+    stopAllMusic();
+    try {
+      ingameSong.volume = 0.4;
+      ingameSong.loop = true;
+      await ingameSong.play();
+    } catch (error) {
+      console.log('Không thể phát nhạc trong game:', error);
+    }
+  };
   
   // Hiển thị leaderboard khi trang load
   displayLeaderboard();
+
+  if (themeSong) {
+    attemptPlayThemeSong();
+  }
+
+  const retryThemeSong = () => {
+    attemptPlayThemeSong();
+  };
+
+  window.addEventListener('pageshow', retryThemeSong);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      retryThemeSong();
+    }
+  });
+
+  ['click', 'touchstart', 'pointerdown', 'keydown'].forEach(eventName => {
+    document.addEventListener(eventName, retryThemeSong, { once: true });
+  });
+
+  if (homeScreen) {
+    homeScreen.addEventListener('click', retryThemeSong);
+    homeScreen.addEventListener('touchstart', retryThemeSong, { passive: true });
+  }
+
   
   if (startBtn) {
     startBtn.addEventListener('click', () => {
+      playIngameSong();
       gameCompleted = false;
       gameOverFlag = false;
       document.getElementById('home-screen').style.display = 'none';
@@ -26,6 +100,11 @@ document.addEventListener('DOMContentLoaded', () => {
   
   if (homeBtn) {
     homeBtn.addEventListener('click', () => {
+      if (ingameSong) {
+        ingameSong.pause();
+        ingameSong.currentTime = 0;
+      }
+      attemptPlayThemeSong();
       location.reload(); // Reload trang để về màn hình chủ
     });
   }
@@ -215,7 +294,7 @@ function skipPlayerName() {
 
 let playerImage;
 let mummyImage;
-let player = { x: 50, y: 550, speed: 0, size: 20, gridX: 1, gridY: 11 };
+let player = { x: 50, y: 550, speed: 0, size: 20, gridX: 1, gridY: 11, prevGridX: 1, prevGridY: 11 };
 let mummy = { x: 0, y: 0, gridX: 0, gridY: 0 };
 let objectivePos = { x: 0, y: 0 };
 let grid = [];
@@ -226,9 +305,11 @@ let level = 4;
 let score = 0;
 let currentPuzzles = []; 
 let currentPuzzle = {};
+let pendingPuzzles = [];
 let puzzles = [];
 let gameOverFlag = false;
 let mummyPauseSteps = 0;
+let puzzleRestorePosition = null;
 const tileSize = 50;
 const levelScores = [10, 20, 30, 40]; 
 
@@ -355,19 +436,33 @@ function drawMummy() {
 function keyPressed() {
   let newGridX = player.gridX;
   let newGridY = player.gridY;
+  let movedByPlayer = false;
 
-  if (keyCode === LEFT_ARROW && player.gridX > 0) newGridX--;
-  if (keyCode === RIGHT_ARROW && player.gridX < 11) newGridX++;
-  if (keyCode === UP_ARROW && player.gridY > 0) newGridY--;
-  if (keyCode === DOWN_ARROW && player.gridY < 11) newGridY++;
+  if (keyCode === LEFT_ARROW && player.gridX > 0) {
+    newGridX--;
+    movedByPlayer = true;
+  }
+  if (keyCode === RIGHT_ARROW && player.gridX < 11) {
+    newGridX++;
+    movedByPlayer = true;
+  }
+  if (keyCode === UP_ARROW && player.gridY > 0) {
+    newGridY--;
+    movedByPlayer = true;
+  }
+  if (keyCode === DOWN_ARROW && player.gridY < 11) {
+    newGridY++;
+    movedByPlayer = true;
+  }
 
-  if (grid[newGridY][newGridX] !== 'W') {
+  if (movedByPlayer && grid[newGridY] && grid[newGridY][newGridX] !== 'W') {
+    player.prevGridX = player.gridX;
+    player.prevGridY = player.gridY;
     player.gridX = newGridX;
     player.gridY = newGridY;
     player.x = player.gridX * tileSize + tileSize / 2;
     player.y = player.gridY * tileSize + tileSize / 2;
-    
-    // Xác ướp chỉ di chuyển nếu màn hình giải đố KHÔNG hiển thị
+
     let decodeScreen = document.getElementById('decode-screen');
     if (decodeScreen && decodeScreen.style.display !== 'block') {
       if (mummyPauseSteps > 0) {
@@ -412,12 +507,34 @@ function moveMummy() {
 }
 
 function checkCollisions() {
+  const decodeScreen = document.getElementById('decode-screen');
+  if (decodeScreen && decodeScreen.style.display === 'block') {
+    return;
+  }
+
   // Kiểm tra va chạm với gem
   for (let g of gems) {
     if (dist(player.x, player.y, g.x, g.y) < 20) {
-      gems = gems.filter(item => item !== g);
-      if (currentPuzzles.length > 0) {
-        currentPuzzle = currentPuzzles.shift(); 
+      const existingPendingPuzzle = pendingPuzzles.find(entry => entry.gem === g);
+      if (existingPendingPuzzle) {
+        currentPuzzle = existingPendingPuzzle.puzzle;
+        currentPuzzle.pending = true;
+        currentPuzzle.gem = g;
+        puzzleRestorePosition = existingPendingPuzzle.restorePosition;
+        updateUI();
+        showDecodeScreen();
+      } else if (currentPuzzles.length > 0) {
+        const nextPuzzle = currentPuzzles.shift();
+        nextPuzzle.pending = true;
+        nextPuzzle.gem = g;
+        const newEntry = {
+          puzzle: nextPuzzle,
+          gem: g,
+          restorePosition: { gridX: player.prevGridX, gridY: player.prevGridY }
+        };
+        pendingPuzzles.push(newEntry);
+        currentPuzzle = nextPuzzle;
+        puzzleRestorePosition = newEntry.restorePosition;
         updateUI();
         showDecodeScreen();
       }
@@ -436,6 +553,7 @@ function checkCollisions() {
       level++;
       score = 0; 
       currentPuzzles = []; 
+      pendingPuzzles = [];
       currentPuzzle = {};
       initMap(level);
       updateUI();
@@ -475,12 +593,16 @@ decodeScreen.innerHTML = `
   </select>
   <input type="text" id="decode-input" placeholder="Nhập chuỗi giải mã">
   <button onclick="submitDecode()">Xác nhận</button>
-  <button onclick="hideDecodeScreen()">Hủy</button>
+  <button onclick="cancelDecodeScreen()">Hủy</button>
 `;
 document.body.appendChild(decodeScreen);
 decodeScreen.style.display = 'none';
 
 function showDecodeScreen() {
+  if (decodeScreen.style.display === 'block') {
+    return;
+  }
+
   decodeScreen.style.display = 'block';
   let shift = currentPuzzle.cipher_type === 'caesar' ? floor(random(1, 26)) : null;
   if (currentPuzzle.cipher_type === 'caesar') {
@@ -502,6 +624,17 @@ function hideDecodeScreen() {
   window.focus();
 }
 
+function cancelDecodeScreen() {
+  if (puzzleRestorePosition) {
+    player.gridX = puzzleRestorePosition.gridX;
+    player.gridY = puzzleRestorePosition.gridY;
+    player.x = player.gridX * tileSize + tileSize / 2;
+    player.y = player.gridY * tileSize + tileSize / 2;
+    moveMummy();
+  }
+  hideDecodeScreen();
+}
+
 function submitDecode() {
   let input = document.getElementById('decode-input').value.toLowerCase();
   let cipherType = document.getElementById('cipher-type').value;
@@ -512,7 +645,15 @@ function submitDecode() {
 
   if (cipherType === currentPuzzle.cipher_type && input === currentPuzzle.treasure.toLowerCase()) {
     feedback.innerText = "Thông điệp đã được giải mã thành công! Tiếp tục.";
-    score += 10; 
+    score += 10;
+    if (currentPuzzle.gem) {
+      gems = gems.filter(item => item !== currentPuzzle.gem);
+    }
+    pendingPuzzles = pendingPuzzles.filter(entry => entry.puzzle !== currentPuzzle);
+    currentPuzzle.pending = false;
+    currentPuzzle.gem = null;
+    currentPuzzle = {};
+    puzzleRestorePosition = null;
     hideDecodeScreen();
     mummyPauseSteps = 2; // Xác ướp đứng im 2 bước của người chơi sau khi giải xong
   } else {
@@ -533,6 +674,7 @@ function caesarEncode(text, shift) {
 
 function resetPuzzles() {
   currentPuzzles = [...puzzles[level - 1].puzzles]; 
+  pendingPuzzles = [];
   currentPuzzle = {}; 
 }
 
