@@ -228,6 +228,8 @@ let currentPuzzles = [];
 let currentPuzzle = {};
 let puzzles = [];
 let gameOverFlag = false;
+let mummyMoveCounter = 0;
+let mummyMoveInterval = 15; // Xác ướp di chuyển mỗi 15 frames
 const tileSize = 50;
 const levelScores = [10, 20, 30, 40]; 
 
@@ -262,6 +264,13 @@ function draw() {
   drawPlayer();
   checkCollisions();
   updateTimer();
+  
+  // Xác ướp di chuyển tự động mỗi N frames
+  mummyMoveCounter++;
+  if (mummyMoveCounter >= mummyMoveInterval) {
+    moveMummy();
+    mummyMoveCounter = 0;
+  }
 }
 
 function initMap(level) {
@@ -280,6 +289,7 @@ function initElements() {
   gems = [];
   enemies = [];
   lava = [];
+  mummyMoveCounter = 0; // Reset bộ đếm khi load map mới
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[y].length; x++) {
       if (grid[y][x] === 'G') gems.push({ x: x * tileSize + tileSize / 2, y: y * tileSize + tileSize / 2 });
@@ -358,7 +368,6 @@ function keyPressed() {
     player.gridY = newGridY;
     player.x = player.gridX * tileSize + tileSize / 2;
     player.y = player.gridY * tileSize + tileSize / 2;
-    moveMummy(); // Xác ườbp đi theo
   }
 }
 
