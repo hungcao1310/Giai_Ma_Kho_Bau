@@ -302,6 +302,7 @@ function skipPlayerName() {
 
 let playerImage;
 let mummyImage;
+let lavaImage;
 let player = { x: 50, y: 550, speed: 0, size: 20, gridX: 1, gridY: 11, prevGridX: 1, prevGridY: 11 };
 let mummy = { x: 0, y: 0, gridX: 0, gridY: 0 };
 let objectivePos = { x: 0, y: 0 };
@@ -309,23 +310,28 @@ let grid = [];
 let gems = [];
 let enemies = [];
 let lava = [];
-let level = 1;
+let level = 4;
 let score = 0;
+let levelScore = 0;
 let currentPuzzles = []; 
 let currentPuzzle = {};
 let pendingPuzzles = [];
 let puzzles = [];
 let gameOverFlag = false;
+let gameOverReason = '';
 let mummyPauseSteps = 0;
 let puzzleRestorePosition = null;
 const tileSize = 50;
-const levelScores = [10, 20, 30, 40]; 
+const levelScores = [10, 20, 30, 40];
+const puzzlePointsByLevel = [5, 10, 15, 20];
+const mapCompletionBonusByLevel = [10, 20, 30, 40];
 
 // ==================== Module 4: Tải bản đồ, ảnh và dữ liệu câu đố ====================
 function preload() {
   playerImage = loadImage('data/picture/adventurer.png');
   mummyImage = loadImage('data/picture/mummy.png');
   wallImage = loadImage('data/picture/wall.png');
+  lavaImage = loadImage('data/picture/lava.jpg');
   loadJSON('data/puzzles.json', (data) => {
     puzzles = data.levels;
   });
@@ -408,8 +414,13 @@ function drawMap() {
         fill(237, 201, 175);
         rect(posX, posY, tileSize, tileSize);
       } else if (grid[y][x] === 'L') {
-        fill(255, 215, 0); 
-        rect(posX, posY, tileSize, tileSize);
+        if (typeof lavaImage !== 'undefined' && lavaImage) {
+          imageMode(CORNER);
+          image(lavaImage, posX, posY, tileSize, tileSize);
+        } else {
+          fill(255, 215, 0); 
+          rect(posX, posY, tileSize, tileSize);
+        }
       } else if (grid[y][x] === 'O') {
         fill(105, 105, 105); 
         rect(posX, posY, tileSize, tileSize);
@@ -476,6 +487,13 @@ function keyPressed() {
     player.gridY = newGridY;
     player.x = player.gridX * tileSize + tileSize / 2;
     player.y = player.gridY * tileSize + tileSize / 2;
+
+    if (grid[player.gridY] && grid[player.gridY][player.gridX] === 'L') {
+      gameOverFlag = true;
+      gameOverReason = 'lava';
+      showLostScreen();
+      return;
+    }
 
     let decodeScreen = document.getElementById('decode-screen');
     if (decodeScreen && decodeScreen.style.display !== 'block') {
@@ -561,14 +579,17 @@ function checkCollisions() {
   // Kiểm tra va chạm với xác ườbp
   if (dist(player.x, player.y, mummy.x, mummy.y) < 25) {
     gameOverFlag = true;
+    gameOverReason = 'mummy';
     showLostScreen();
     return;
   }
   // Kiểm tra đến đích
-  if (grid[player.gridY][player.gridX] === 'O' && score >= levelScores[level - 1]) {
+  if (grid[player.gridY][player.gridX] === 'O' && levelScore >= levelScores[level - 1]) {
+    score += mapCompletionBonusByLevel[level - 1];
+    updateUI();
     if (level < 4) {
       level++;
-      score = 0; 
+      levelScore = 0;
       currentPuzzles = []; 
       pendingPuzzles = [];
       currentPuzzle = {};
@@ -677,7 +698,10 @@ function submitDecode() {
 
   if (cipherType === currentPuzzle.cipher_type && input === currentPuzzle.treasure.toLowerCase()) {
     feedback.innerText = "Thông điệp đã được giải mã thành công! Tiếp tục.";
-    score += 10;
+    const puzzlePoints = puzzlePointsByLevel[level - 1] || 0;
+    score += puzzlePoints;
+    levelScore += puzzlePoints;
+    updateUI();
     if (currentPuzzle.gem) {
       gems = gems.filter(item => item !== currentPuzzle.gem);
     }
@@ -707,6 +731,7 @@ function caesarEncode(text, shift) {
 
 // ==================== Module 7: Tiện ích và màn hình kết thúc ====================
 function resetPuzzles() {
+  levelScore = 0;
   currentPuzzles = puzzles[level - 1].puzzles.map(p => ({ ...p }));
   pendingPuzzles = [];
   currentPuzzle = {};
@@ -763,7 +788,7 @@ function showLostScreen() {
         box-shadow: 0 0 20px rgba(0,0,0,0.5);
       ">
         <h2 style="font-size: 2em; color: #ff6b6b; margin-bottom: 20px;">💀 Bạn đã thua cuộc!</h2>
-        <p style="font-size: 1.2em; margin: 15px 0; color: #333;">Xác ướp đã bắt được bạn!</p>
+        <p id="lost-reason" style="font-size: 1.2em; margin: 15px 0; color: #333;"></p>
         <p id="lost-stats" style="font-size: 1em; color: #666; margin: 15px 0;"></p>
         <button id="home-btn-lost" style="
           margin-top: 20px;
@@ -786,6 +811,13 @@ function showLostScreen() {
     });
   }
   
+  const lostReason = document.getElementById('lost-reason');
+  if (lostReason) {
+    lostReason.innerText = gameOverReason === 'lava'
+      ? 'Bạn đã bị dung nham nuốt chửng!'
+      : 'Bạn đã bị xác ướp bắt được!';
+  }
+
   // Hiển thị thông tin trò chơi
   let elapsedTime = Date.now() - startTime;
   let timeStr = formatTime(elapsedTime);

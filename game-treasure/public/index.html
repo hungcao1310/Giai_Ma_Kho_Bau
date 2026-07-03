@@ -13,10 +13,24 @@
       display: flex;
       height: 100vh;
     }
+    #game-info {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 5;
+      background: rgba(0, 0, 0, 0.75);
+      color: #f0f0f0;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      max-width: 420px;
+    }
     #game-info p {
         white-space: nowrap; 
         font-size: 16px; 
         color: #f0f0f0; 
+        margin: 0;
         }
     #complete-screen {
       position: fixed;
@@ -401,15 +415,15 @@
   </div>
   <div id="game-container">
     <h1>Giải mã kho báu</h1>
+    <div id="game-canvas" style="position: relative;"></div>
     <div id="game-info">
-    <p>
+      <p>
         Cấp độ: <span id="level">1</span> |
         Điểm: <span id="score">0</span> |
         Thời gian: <span id="timer">00:00</span> |
         Câu đố: <span id="current-puzzle">Thu thập gem để nhận câu đố</span>
-    </p>
-</div>
-    <div id="game-canvas"></div>
+      </p>
+    </div>
   </div>
   <div id="info-container">
     <h2>Giới thiệu trò chơi</h2>
