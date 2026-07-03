@@ -312,7 +312,8 @@ function drawMap() {
           rect(posX, posY, tileSize, tileSize);
         }
       } else if (grid[y][x] === 'P') {
-        fill(34, 139, 34); 
+        // Sand color for platforms
+        fill(237, 201, 175);
         rect(posX, posY, tileSize, tileSize);
       } else if (grid[y][x] === 'L') {
         fill(255, 215, 0); 
