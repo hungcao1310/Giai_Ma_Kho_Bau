@@ -2,6 +2,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('start-btn');
   const homeBtn = document.getElementById('home-btn');
+  const introBtn = document.getElementById('intro-btn');
+  const closeIntroBtn = document.getElementById('close-intro-btn');
   const saveNameBtn = document.getElementById('save-name-btn');
   const skipNameBtn = document.getElementById('skip-name-btn');
   const leaderboardBtn = document.getElementById('leaderboard-btn');
@@ -13,9 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
   
   if (startBtn) {
     startBtn.addEventListener('click', () => {
+      gameCompleted = false;
+      gameOverFlag = false;
       document.getElementById('home-screen').style.display = 'none';
       document.getElementById('game-container').style.display = 'flex';
-      document.getElementById('info-container').style.display = 'block';
+      document.getElementById('info-container').style.display = 'none';
       startTime = Date.now(); // Bắt đầu đếm thời gian
     });
   }
@@ -23,6 +27,18 @@ document.addEventListener('DOMContentLoaded', () => {
   if (homeBtn) {
     homeBtn.addEventListener('click', () => {
       location.reload(); // Reload trang để về màn hình chủ
+    });
+  }
+  
+  if (introBtn) {
+    introBtn.addEventListener('click', () => {
+      document.getElementById('intro-screen').classList.add('show');
+    });
+  }
+  
+  if (closeIntroBtn) {
+    closeIntroBtn.addEventListener('click', () => {
+      document.getElementById('intro-screen').classList.remove('show');
     });
   }
   
@@ -197,20 +213,27 @@ function skipPlayerName() {
   }, 500);
 }
 
+let playerImage;
+let mummyImage;
 let player = { x: 50, y: 550, speed: 0, size: 20, gridX: 1, gridY: 11 };
+let mummy = { x: 0, y: 0, gridX: 0, gridY: 0 };
+let objectivePos = { x: 0, y: 0 };
 let grid = [];
 let gems = [];
 let enemies = [];
 let lava = [];
-let level = 1;
+let level = 4;
 let score = 0;
 let currentPuzzles = []; 
 let currentPuzzle = {};
 let puzzles = [];
+let gameOverFlag = false;
 const tileSize = 50;
 const levelScores = [10, 20, 30, 40]; 
 
 function preload() {
+  playerImage = loadImage('data/picture/adventurer.png');
+  mummyImage = loadImage('data/picture/mummy.png');
   loadJSON('data/puzzles.json', (data) => {
     puzzles = data.levels;
   });
@@ -232,9 +255,10 @@ function setup() {
 }
 
 function draw() {
-  if (gameCompleted) return; // Dừng vẽ khi game hoàn thành
+  if (gameCompleted || gameOverFlag) return; // Dừng vẽ khi game hoàn thành hoặc thua
   background(50);
   drawMap();
+  drawMummy();
   drawPlayer();
   checkCollisions();
   updateTimer();
@@ -261,6 +285,13 @@ function initElements() {
       if (grid[y][x] === 'G') gems.push({ x: x * tileSize + tileSize / 2, y: y * tileSize + tileSize / 2 });
       if (grid[y][x] === 'E') enemies.push({ x: x * tileSize + tileSize / 2, y: y * tileSize + tileSize / 2 });
       if (grid[y][x] === 'L') lava.push({ x: x * tileSize, y: y * tileSize, w: tileSize, h: tileSize });
+      if (grid[y][x] === 'O') {
+        objectivePos = { x, y };
+        mummy.gridX = x;
+        mummy.gridY = y;
+        mummy.x = x * tileSize + tileSize / 2;
+        mummy.y = y * tileSize + tileSize / 2;
+      }
     }
   }
 }
@@ -292,8 +323,25 @@ function drawMap() {
 }
 
 function drawPlayer() {
-  fill(0, 0, 255);
-  ellipse(player.x, player.y, player.size, player.size);
+  if (playerImage) {
+    const imgSize = player.size * 2;
+    imageMode(CENTER);
+    image(playerImage, player.x, player.y, imgSize, imgSize);
+  } else {
+    fill(0, 0, 255);
+    ellipse(player.x, player.y, player.size, player.size);
+  }
+}
+
+function drawMummy() {
+  if (mummyImage) {
+    const imgSize = 35;
+    imageMode(CENTER);
+    image(mummyImage, mummy.x, mummy.y, imgSize, imgSize);
+  } else {
+    fill(200, 150, 100);
+    ellipse(mummy.x, mummy.y, 30, 30);
+  }
 }
 
 function keyPressed() {
@@ -310,10 +358,32 @@ function keyPressed() {
     player.gridY = newGridY;
     player.x = player.gridX * tileSize + tileSize / 2;
     player.y = player.gridY * tileSize + tileSize / 2;
+    moveMummy(); // Xác ườbp đi theo
+  }
+}
+
+function moveMummy() {
+  // Xác ướp đi theo nhân vật sử dụng tiến cận ngây ngô lộp
+  let newGridX = mummy.gridX;
+  let newGridY = mummy.gridY;
+  
+  // Tiến cận ngây ngô (simple greedy pathfinding)
+  if (player.gridX < mummy.gridX) newGridX--;
+  else if (player.gridX > mummy.gridX) newGridX++;
+  else if (player.gridY < mummy.gridY) newGridY--;
+  else if (player.gridY > mummy.gridY) newGridY++;
+  
+  // Kiểm tra có thể đi hay không
+  if (grid[newGridY] && grid[newGridY][newGridX] !== 'W') {
+    mummy.gridX = newGridX;
+    mummy.gridY = newGridY;
+    mummy.x = mummy.gridX * tileSize + tileSize / 2;
+    mummy.y = mummy.gridY * tileSize + tileSize / 2;
   }
 }
 
 function checkCollisions() {
+  // Kiểm tra va chạm với gem
   for (let g of gems) {
     if (dist(player.x, player.y, g.x, g.y) < 20) {
       gems = gems.filter(item => item !== g);
@@ -325,6 +395,13 @@ function checkCollisions() {
       break;
     }
   }
+  // Kiểm tra va chạm với xác ườbp
+  if (dist(player.x, player.y, mummy.x, mummy.y) < 25) {
+    gameOverFlag = true;
+    showLostScreen();
+    return;
+  }
+  // Kiểm tra đến đích
   if (grid[player.gridY][player.gridX] === 'O' && score >= levelScores[level - 1]) {
     if (level < 4) {
       level++;
@@ -443,4 +520,64 @@ function showCompleteScreen() {
   document.getElementById('name-input-screen').classList.add('show');
   document.getElementById('player-name-input').value = '';
   document.getElementById('player-name-input').focus();
+}
+
+function showLostScreen() {
+  let lostScreen = document.getElementById('lost-screen');
+  
+  // Tạo element nếu chưa tồn tại
+  if (!lostScreen) {
+    lostScreen = document.createElement('div');
+    lostScreen.id = 'lost-screen';
+    lostScreen.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    `;
+    lostScreen.innerHTML = `
+      <div style="
+        background: white;
+        padding: 40px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      ">
+        <h2 style="font-size: 2em; color: #ff6b6b; margin-bottom: 20px;">💀 Bạn đã thua cuộc!</h2>
+        <p style="font-size: 1.2em; margin: 15px 0; color: #333;">Xác ướp đã bắt được bạn!</p>
+        <p id="lost-stats" style="font-size: 1em; color: #666; margin: 15px 0;"></p>
+        <button id="home-btn-lost" style="
+          margin-top: 20px;
+          padding: 12px 30px;
+          font-size: 1em;
+          background-color: #ff6b6b;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+        ">Về trang chủ</button>
+      </div>
+    `;
+    document.body.appendChild(lostScreen);
+    
+    // Thêm event listener cho nút về trang chủ
+    document.getElementById('home-btn-lost').addEventListener('click', () => {
+      location.reload();
+    });
+  }
+  
+  // Hiển thị thông tin trò chơi
+  let elapsedTime = Date.now() - startTime;
+  let timeStr = formatTime(elapsedTime);
+  document.getElementById('lost-stats').innerText = `Thời gian chơi: ${timeStr} | Điểm số: ${score}`;
+  
+  lostScreen.style.display = 'flex';
 }
