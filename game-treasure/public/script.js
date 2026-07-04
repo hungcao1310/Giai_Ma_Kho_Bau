@@ -10,10 +10,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeLeaderboardBtn = document.getElementById('close-leaderboard-btn');
   const leaderboardOverlay = document.getElementById('leaderboard-overlay');
   const homeScreen = document.getElementById('home-screen');
-  const themeSong = document.getElementById('theme-song');
-  const ingameSong = document.getElementById('ingame-song');
+  themeSong = document.getElementById('theme-song');
+  ingameSong = document.getElementById('ingame-song');
   footstepsSound = document.getElementById('footsteps-sound');
   teleportSound = document.getElementById('teleport-sound');
+  lavaBurnSound = document.getElementById('lava-burn-sound');
+  mummyBiteSound = document.getElementById('mummy-bite-sound');
   let audioStarted = false;
 
   const stopAllMusic = () => {
@@ -79,7 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   ['click', 'touchstart', 'pointerdown', 'keydown'].forEach(eventName => {
-    document.addEventListener(eventName, retryThemeSong, { once: true });
+    document.addEventListener(eventName, () => {
+      retryThemeSong();
+      ensureAudioUnlocked();
+    }, { once: true });
   });
 
   if (homeScreen) {
@@ -310,8 +315,12 @@ let leverImage;
 let stairImage;
 let tpImage;
 let treasureImage;
+let themeSong;
+let ingameSong;
 let footstepsSound;
 let teleportSound;
+let lavaBurnSound;
+let mummyBiteSound;
 let player = { x: 50, y: 550, speed: 0, size: 20, gridX: 1, gridY: 11, prevGridX: 1, prevGridY: 11 };
 let mummy = { x: 0, y: 0, gridX: 0, gridY: 0 };
 let objectivePos = { x: 0, y: 0 };
@@ -329,13 +338,50 @@ let pendingPuzzles = [];
 let puzzles = [];
 let gameOverFlag = false;
 let gameOverReason = '';
+let lostScreenTimeout = null;
 let mummyPauseSteps = 0;
 let puzzleRestorePosition = null;
 let specialQuestionActive = false;
+let audioContext = null;
+let burnEffect = { active: false, x: 0, y: 0, particles: [] };
+let headFallEffect = { active: false, x: 0, y: 0, vx: 0, vy: 0, alpha: 255, life: 0 };
 const tileSize = 50;
 const levelScores = [10, 20, 30, 40];
 const puzzlePointsByLevel = [5, 10, 15, 20];
 const mapCompletionBonusByLevel = [10, 20, 30, 40];
+
+function getAudioContext() {
+  if (!audioContext) {
+    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextCtor) {
+      audioContext = new AudioContextCtor();
+    }
+  }
+  if (audioContext && audioContext.state === 'suspended') {
+    audioContext.resume().catch(() => {});
+  }
+  return audioContext;
+}
+
+function ensureAudioUnlocked() {
+  getAudioContext();
+}
+
+function playMummyBiteSound() {
+  ensureAudioUnlocked();
+  if (!mummyBiteSound) return;
+  mummyBiteSound.currentTime = 0;
+  mummyBiteSound.volume = 0.5;
+  mummyBiteSound.play().catch(() => {});
+}
+
+function playLavaBurnSound() {
+  ensureAudioUnlocked();
+  if (!lavaBurnSound) return;
+  lavaBurnSound.currentTime = 0;
+  lavaBurnSound.volume = 0.5;
+  lavaBurnSound.play().catch(() => {});
+}
 
 // ==================== Module 4: Tải bản đồ, ảnh và dữ liệu câu đố ====================
 function preload() {
@@ -368,10 +414,24 @@ function setup() {
 }
 
 function draw() {
-  if (gameCompleted || gameOverFlag) return; // Dừng vẽ khi game hoàn thành hoặc thua
+  if (gameCompleted) return;
   background(50);
   drawMap();
   drawMummy();
+
+  if (burnEffect.active) {
+    updateBurnEffect();
+    drawBurnEffect();
+    return;
+  }
+
+  if (headFallEffect.active) {
+    updateHeadFallEffect();
+    drawHeadFallEffect();
+    return;
+  }
+
+  if (gameOverFlag) return;
   drawPlayer();
   checkCollisions();
   updateTimer();
@@ -382,11 +442,69 @@ function initMap(level) {
     grid = data.grid;
     player.gridX = data.start.x;
     player.gridY = data.start.y;
+    player.prevGridX = player.gridX;
+    player.prevGridY = player.gridY;
     player.x = player.gridX * tileSize + tileSize / 2;
     player.y = player.gridY * tileSize + tileSize / 2;
     initElements();
     resetPuzzles();
+    updateUI();
   });
+}
+
+function findObjectiveCell() {
+  for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[y].length; x++) {
+      if (grid[y][x] === 'O') {
+        return { x, y };
+      }
+    }
+  }
+  return null;
+}
+
+function findSafePath(startX, startY, targetX, targetY) {
+  const rows = grid.length;
+  const cols = grid[0].length;
+  const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
+  const parent = Array.from({ length: rows }, () => Array(cols).fill(null));
+  const queue = [{ x: startX, y: startY }];
+  visited[startY][startX] = true;
+
+  const directions = [
+    { x: 1, y: 0 },
+    { x: -1, y: 0 },
+    { x: 0, y: 1 },
+    { x: 0, y: -1 }
+  ];
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (current.x === targetX && current.y === targetY) {
+      const path = [];
+      let node = current;
+      while (node) {
+        path.push({ x: node.x, y: node.y });
+        node = parent[node.y][node.x];
+      }
+      return path;
+    }
+
+    for (let dir of directions) {
+      const nx = current.x + dir.x;
+      const ny = current.y + dir.y;
+      if (nx >= 0 && nx < cols && ny >= 0 && ny < rows && !visited[ny][nx]) {
+        const cellValue = grid[ny][nx];
+        if (cellValue === 'P' || cellValue === 'G' || cellValue === 'O') {
+          visited[ny][nx] = true;
+          parent[ny][nx] = current;
+          queue.push({ x: nx, y: ny });
+        }
+      }
+    }
+  }
+
+  return [];
 }
 
 // Khởi tạo các đối tượng trên bản đồ như gem, kẻ địch, lava và vị trí mục tiêu.
@@ -506,7 +624,101 @@ function drawMummy() {
 }
 
 // ==================== Module 5: Di chuyển nhân vật và xác ướp ====================
+function startBurnEffect(x, y) {
+  burnEffect.active = true;
+  burnEffect.x = x;
+  burnEffect.y = y;
+  burnEffect.particles = Array.from({ length: 24 }, () => ({
+    x,
+    y,
+    vx: random(-2.8, 2.8),
+    vy: random(-2.8, 1.2),
+    size: random(4, 9),
+    alpha: 255,
+    life: random(24, 40),
+    rotation: random(0, TWO_PI)
+  }));
+}
+
+function updateBurnEffect() {
+  if (!burnEffect.active) return;
+
+  burnEffect.particles = burnEffect.particles.map(particle => {
+    particle.x += particle.vx;
+    particle.y += particle.vy;
+    particle.vy += 0.07;
+    particle.vx *= 0.97;
+    particle.size *= 0.96;
+    particle.alpha -= 10;
+    particle.life -= 1;
+    return particle;
+  }).filter(particle => particle.alpha > 0 && particle.life > 0);
+
+  if (burnEffect.particles.length === 0) {
+    burnEffect.active = false;
+  }
+}
+
+function drawBurnEffect() {
+  if (!burnEffect.active) return;
+
+  noStroke();
+  burnEffect.particles.forEach(particle => {
+    push();
+    translate(particle.x, particle.y);
+    rotate(particle.rotation);
+    fill(20, 20, 20, particle.alpha);
+    triangle(-particle.size, particle.size, particle.size, particle.size, 0, -particle.size * 0.9);
+    pop();
+  });
+
+  push();
+  translate(burnEffect.x, burnEffect.y - 5);
+  rotate(-0.3);
+  fill(255, 90, 40, 120);
+  triangle(-10, 10, 10, 10, 0, -12);
+  pop();
+}
+
+function startHeadFallEffect(x, y) {
+  headFallEffect.active = true;
+  headFallEffect.x = x;
+  headFallEffect.y = y;
+  headFallEffect.vx = random(-1.5, 1.5);
+  headFallEffect.vy = -3.5;
+  headFallEffect.alpha = 255;
+  headFallEffect.life = 90;
+}
+
+function updateHeadFallEffect() {
+  if (!headFallEffect.active) return;
+  headFallEffect.vy += 0.12;
+  headFallEffect.x += headFallEffect.vx;
+  headFallEffect.y += headFallEffect.vy;
+  headFallEffect.alpha -= 3;
+  headFallEffect.life -= 1;
+  if (headFallEffect.life <= 0 || headFallEffect.alpha <= 0) {
+    headFallEffect.active = false;
+  }
+}
+
+function drawHeadFallEffect() {
+  if (!headFallEffect.active) return;
+  push();
+  translate(headFallEffect.x, headFallEffect.y);
+  noStroke();
+  fill(104, 58, 20, headFallEffect.alpha);
+  ellipse(0, 0, 26, 26);
+  fill(60, 30, 10, headFallEffect.alpha);
+  ellipse(-6, -4, 8, 8);
+  ellipse(6, -4, 8, 8);
+  fill(0, 0, 0, headFallEffect.alpha);
+  arc(0, 4, 12, 8, 0, PI);
+  pop();
+}
+
 function keyPressed() {
+  ensureAudioUnlocked();
   const decodeScreen = document.getElementById('decode-screen');
   const specialQuestionScreen = document.getElementById('special-question-screen');
   if ((decodeScreen && decodeScreen.style.display === 'block') || (specialQuestionScreen && specialQuestionScreen.style.display === 'flex')) {
@@ -543,9 +755,16 @@ function keyPressed() {
     player.y = player.gridY * tileSize + tileSize / 2;
 
     if (grid[player.gridY] && grid[player.gridY][player.gridX] === 'L') {
+      playLavaBurnSound();
+      startBurnEffect(player.x, player.y);
       gameOverFlag = true;
       gameOverReason = 'lava';
-      showLostScreen();
+      if (lostScreenTimeout) {
+        clearTimeout(lostScreenTimeout);
+      }
+      lostScreenTimeout = setTimeout(() => {
+        showLostScreen();
+      }, 1000);
       return;
     }
 
@@ -724,11 +943,18 @@ function checkCollisions() {
       break;
     }
   }
-  // Kiểm tra va chạm với xác ườbp
+  // Kiểm tra va chạm với xác ướp
   if (dist(player.x, player.y, mummy.x, mummy.y) < 25) {
+    playMummyBiteSound();
+    startHeadFallEffect(player.x, player.y);
     gameOverFlag = true;
     gameOverReason = 'mummy';
-    showLostScreen();
+    if (lostScreenTimeout) {
+      clearTimeout(lostScreenTimeout);
+    }
+    lostScreenTimeout = setTimeout(() => {
+      showLostScreen();
+    }, 1000);
     return;
   }
   // Kiểm tra đến đích
@@ -999,6 +1225,64 @@ function formatTime(milliseconds) {
   return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
 }
 
+function resetGameState() {
+  score = 0;
+  levelScore = 0;
+  currentPuzzles = [];
+  currentPuzzle = {};
+  pendingPuzzles = [];
+  gameOverFlag = false;
+  gameCompleted = false;
+  gameOverReason = '';
+  mummyPauseSteps = 0;
+  puzzleRestorePosition = null;
+  specialQuestionActive = false;
+  burnEffect.active = false;
+  headFallEffect.active = false;
+  const lostScreen = document.getElementById('lost-screen');
+  if (lostScreen) {
+    lostScreen.style.display = 'none';
+  }
+  const decodeScreen = document.getElementById('decode-screen');
+  if (decodeScreen) {
+    decodeScreen.style.display = 'none';
+  }
+  const nameInputScreen = document.getElementById('name-input-screen');
+  if (nameInputScreen) {
+    nameInputScreen.classList.remove('show');
+  }
+  const completeScreen = document.getElementById('complete-screen');
+  if (completeScreen) {
+    completeScreen.classList.remove('show');
+  }
+  const homeScreen = document.getElementById('home-screen');
+  if (homeScreen) {
+    homeScreen.style.display = 'none';
+  }
+  const gameContainer = document.getElementById('game-container');
+  if (gameContainer) {
+    gameContainer.style.display = 'flex';
+  }
+  const infoContainer = document.getElementById('info-container');
+  if (infoContainer) {
+    infoContainer.style.display = 'none';
+  }
+  if (lostScreenTimeout) {
+    clearTimeout(lostScreenTimeout);
+    lostScreenTimeout = null;
+  }
+  startTime = Date.now();
+  initMap(level);
+}
+
+function restartGame() {
+  if (ingameSong) {
+    ingameSong.currentTime = 0;
+    ingameSong.play().catch(() => {});
+  }
+  resetGameState();
+}
+
 // Hiển thị màn hình hoàn thành trò chơi và cho phép người chơi nhập tên.
 function showCompleteScreen() {
   let elapsedTime = Date.now() - startTime;
@@ -1045,22 +1329,36 @@ function showLostScreen() {
         <h2 style="font-size: 2em; color: #ff6b6b; margin-bottom: 20px;">💀 Bạn đã thua cuộc!</h2>
         <p id="lost-reason" style="font-size: 1.2em; margin: 15px 0; color: #333;"></p>
         <p id="lost-stats" style="font-size: 1em; color: #666; margin: 15px 0;"></p>
-        <button id="home-btn-lost" style="
-          margin-top: 20px;
-          padding: 12px 30px;
-          font-size: 1em;
-          background-color: #ff6b6b;
-          color: white;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-          transition: background-color 0.3s;
-        ">Về trang chủ</button>
+        <div style="display:flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
+          <button id="retry-btn-lost" style="
+            padding: 12px 30px;
+            font-size: 1em;
+            background-color: #38b2ac;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+          ">Chơi lại</button>
+          <button id="home-btn-lost" style="
+            padding: 12px 30px;
+            font-size: 1em;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+          ">Về trang chủ</button>
+        </div>
       </div>
     `;
     document.body.appendChild(lostScreen);
     
-    // Thêm event listener cho nút về trang chủ
+    // Thêm event listener cho nút chơi lại và về trang chủ
+    document.getElementById('retry-btn-lost').addEventListener('click', () => {
+      restartGame();
+    });
     document.getElementById('home-btn-lost').addEventListener('click', () => {
       location.reload();
     });
