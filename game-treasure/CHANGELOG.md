@@ -19,4 +19,4 @@
 - Sửa lỗi số AES đổi liên tục bằng cách chỉ tạo chuỗi mã hóa một lần khi mở câu đố.
 - Cải thiện quản lý câu đố để các câu đố không bị chặn nhau sau khi hủy.
 - Thêm 30 câu đố cho mỗi map
-- khu vực câu đố giờ sẽ chọn1 câu ngẫu nhiên trong danh sách các câu hỏi
+- khu vực câu đố giờ sẽ chọn 1 câu ngẫu nhiên trong danh sách các câu hỏi

@@ -339,6 +339,20 @@
     }
     #game-container {
       display: none;
+      width: 100%;
+      min-height: 100vh;
+      background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('../data/picture/sand.jpg');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    #game-container h1 {
+      color: #ffffff;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+      margin: 12px 0 8px 0;
+      text-align: center;
+      font-size: 2em;
     }
   </style>
 </head>
@@ -354,6 +368,8 @@
   </div>
   <audio id="theme-song" src="../data/song/theme_song.mp3" loop preload="auto"></audio>
   <audio id="ingame-song" src="../data/song/ingame_song.mp3" loop preload="auto"></audio>
+  <audio id="footsteps-sound" src="../data/song/footsteps.mp3" preload="auto"></audio>
+  <audio id="teleport-sound" src="../data/song/teleport.mp3" preload="auto"></audio>
   <div id="intro-screen">
     <h2>Giới thiệu trò chơi</h2>
     <p>"Giải mã kho báu" là một trò chơi phiêu lưu kết hợp giải đố. Người chơi điều khiển nhân vật thu thập các viên ngọc (gem) để nhận câu đố mã hóa. Mỗi câu đố yêu cầu bạn chọn đúng thuật toán (Caesar, Vigenère, RSA, hoặc AES) và giải mã thông điệp để ghi điểm.</p>

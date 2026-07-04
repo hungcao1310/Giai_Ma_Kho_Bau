@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const homeScreen = document.getElementById('home-screen');
   const themeSong = document.getElementById('theme-song');
   const ingameSong = document.getElementById('ingame-song');
+  footstepsSound = document.getElementById('footsteps-sound');
+  teleportSound = document.getElementById('teleport-sound');
   let audioStarted = false;
 
   const stopAllMusic = () => {
@@ -302,7 +304,14 @@ function skipPlayerName() {
 
 let playerImage;
 let mummyImage;
+let wallImage;
 let lavaImage;
+let leverImage;
+let stairImage;
+let tpImage;
+let treasureImage;
+let footstepsSound;
+let teleportSound;
 let player = { x: 50, y: 550, speed: 0, size: 20, gridX: 1, gridY: 11, prevGridX: 1, prevGridY: 11 };
 let mummy = { x: 0, y: 0, gridX: 0, gridY: 0 };
 let objectivePos = { x: 0, y: 0 };
@@ -310,6 +319,7 @@ let grid = [];
 let gems = [];
 let enemies = [];
 let lava = [];
+let teleports = [];
 let level = 4;
 let score = 0;
 let levelScore = 0;
@@ -321,6 +331,7 @@ let gameOverFlag = false;
 let gameOverReason = '';
 let mummyPauseSteps = 0;
 let puzzleRestorePosition = null;
+let specialQuestionActive = false;
 const tileSize = 50;
 const levelScores = [10, 20, 30, 40];
 const puzzlePointsByLevel = [5, 10, 15, 20];
@@ -332,6 +343,10 @@ function preload() {
   mummyImage = loadImage('data/picture/mummy.png');
   wallImage = loadImage('data/picture/wall.png');
   lavaImage = loadImage('data/picture/lava.jpg');
+  leverImage = loadImage('data/picture/lever.png');
+  stairImage = loadImage('data/picture/stair.png');
+  tpImage = loadImage('data/picture/tp.png');
+  treasureImage = loadImage('data/picture/treasure.png');
   loadJSON('data/puzzles.json', (data) => {
     puzzles = data.levels;
   });
@@ -379,12 +394,14 @@ function initElements() {
   gems = [];
   enemies = [];
   lava = [];
+  teleports = [];
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[y].length; x++) {
       if (grid[y][x] === 'G') gems.push({ x: x * tileSize + tileSize / 2, y: y * tileSize + tileSize / 2 });
-      if (grid[y][x] === 'E') enemies.push({ x: x * tileSize + tileSize / 2, y: y * tileSize + tileSize / 2 });
+      if (grid[y][x] === 'E' && level !== 4) enemies.push({ x: x * tileSize + tileSize / 2, y: y * tileSize + tileSize / 2 });
       if (grid[y][x] === 'L') lava.push({ x: x * tileSize, y: y * tileSize, w: tileSize, h: tileSize });
-      if (grid[y][x] === 'O') {
+      if (grid[y][x] === 'T') teleports.push({ x, y });
+      if (grid[y][x] === 'O' || (grid[y][x] === 'E' && level === 4)) {
         objectivePos = { x, y };
         mummy.gridX = x;
         mummy.gridY = y;
@@ -409,8 +426,19 @@ function drawMap() {
           fill(139, 69, 19); 
           rect(posX, posY, tileSize, tileSize);
         }
-      } else if (grid[y][x] === 'P') {
-        // Sand color for platforms
+      } else if (grid[y][x] === 'P' || grid[y][x] === 'G') {
+        // Sand color for platforms and items
+        fill(237, 201, 175);
+        rect(posX, posY, tileSize, tileSize);
+      } else if (grid[y][x] === 'E' && level === 4) {
+        if (typeof treasureImage !== 'undefined' && treasureImage) {
+          imageMode(CORNER);
+          image(treasureImage, posX, posY, tileSize, tileSize);
+        } else {
+          fill(255, 215, 0);
+          rect(posX, posY, tileSize, tileSize);
+        }
+      } else if (grid[y][x] === 'E') {
         fill(237, 201, 175);
         rect(posX, posY, tileSize, tileSize);
       } else if (grid[y][x] === 'L') {
@@ -421,14 +449,34 @@ function drawMap() {
           fill(255, 215, 0); 
           rect(posX, posY, tileSize, tileSize);
         }
+      } else if (grid[y][x] === 'T') {
+        if (typeof tpImage !== 'undefined' && tpImage) {
+          imageMode(CORNER);
+          image(tpImage, posX, posY, tileSize, tileSize);
+        } else {
+          fill(135, 206, 250);
+          rect(posX, posY, tileSize, tileSize);
+        }
       } else if (grid[y][x] === 'O') {
-        fill(105, 105, 105); 
-        rect(posX, posY, tileSize, tileSize);
+        if (typeof stairImage !== 'undefined' && stairImage) {
+          imageMode(CORNER);
+          image(stairImage, posX, posY, tileSize, tileSize);
+        } else {
+          fill(105, 105, 105); 
+          rect(posX, posY, tileSize, tileSize);
+        }
       }
     }
   }
   fill(0, 191, 255);
-  for (let g of gems) ellipse(g.x, g.y, 15, 15);
+  for (let g of gems) {
+    if (typeof leverImage !== 'undefined' && leverImage) {
+      imageMode(CENTER);
+      image(leverImage, g.x, g.y, 30, 30);
+    } else {
+      ellipse(g.x, g.y, 15, 15);
+    }
+  }
   fill(255, 69, 0);
   for (let e of enemies) ellipse(e.x, e.y, 20, 20);
 }
@@ -459,6 +507,12 @@ function drawMummy() {
 
 // ==================== Module 5: Di chuyển nhân vật và xác ướp ====================
 function keyPressed() {
+  const decodeScreen = document.getElementById('decode-screen');
+  const specialQuestionScreen = document.getElementById('special-question-screen');
+  if ((decodeScreen && decodeScreen.style.display === 'block') || (specialQuestionScreen && specialQuestionScreen.style.display === 'flex')) {
+    return;
+  }
+
   let newGridX = player.gridX;
   let newGridY = player.gridY;
   let movedByPlayer = false;
@@ -495,8 +549,37 @@ function keyPressed() {
       return;
     }
 
+    if (grid[player.gridY] && grid[player.gridY][player.gridX] === 'T') {
+      teleportPlayer();
+    }
+
+    const currentTile = grid[player.gridY] && grid[player.gridY][player.gridX];
+    const map4SwitchesDone = gems.length === 0 && pendingPuzzles.length === 0 && currentPuzzles.length === 0;
+
+    if (level === 4 && currentTile && (currentTile === 'O' || currentTile === 'E')) {
+      if (!map4SwitchesDone) {
+        showGameFeedback('Bạn chưa kích hoạt hết các công tắc');
+      } else if (currentTile === 'E' && !specialQuestionActive) {
+        showSpecialQuestionScreen();
+        return;
+      }
+    }
+
     let decodeScreen = document.getElementById('decode-screen');
     if (decodeScreen && decodeScreen.style.display !== 'block') {
+      if (footstepsSound) {
+        try {
+          footstepsSound.pause();
+          footstepsSound.currentTime = 0;
+          footstepsSound.volume = 0.4;
+          const playPromise = footstepsSound.play();
+          if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch(() => {});
+          }
+        } catch (error) {
+          // Ignore if browser blocks autoplay or audio is not ready.
+        }
+      }
       if (mummyPauseSteps > 0) {
         mummyPauseSteps -= 1;
       } else {
@@ -506,37 +589,102 @@ function keyPressed() {
   }
 }
 
-// Di chuyển xác ướp theo hướng gần người chơi nhất, ưu tiên đường thẳng trước.
+// Di chuyển xác ướp theo đường đi hợp lệ tránh tường bằng BFS.
 function moveMummy() {
-  let dx = player.gridX - mummy.gridX;
-  let dy = player.gridY - mummy.gridY;
-  let tryMoves = [];
+  const start = { x: mummy.gridX, y: mummy.gridY };
+  const target = { x: player.gridX, y: player.gridY };
+  const rows = grid.length;
+  const cols = grid[0].length;
+  const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
+  const parent = Array.from({ length: rows }, () => Array(cols).fill(null));
+  const queue = [start];
+  visited[start.y][start.x] = true;
 
-  // Ưu tiên hướng gần hơn
-  if (Math.abs(dx) >= Math.abs(dy)) {
-    if (dx < 0) tryMoves.push({ x: -1, y: 0 });
-    else if (dx > 0) tryMoves.push({ x: 1, y: 0 });
-    if (dy < 0) tryMoves.push({ x: 0, y: -1 });
-    else if (dy > 0) tryMoves.push({ x: 0, y: 1 });
-  } else {
-    if (dy < 0) tryMoves.push({ x: 0, y: -1 });
-    else if (dy > 0) tryMoves.push({ x: 0, y: 1 });
-    if (dx < 0) tryMoves.push({ x: -1, y: 0 });
-    else if (dx > 0) tryMoves.push({ x: 1, y: 0 });
-  }
+  const directions = [
+    { x: 1, y: 0 },
+    { x: -1, y: 0 },
+    { x: 0, y: 1 },
+    { x: 0, y: -1 }
+  ];
 
-  // Nếu hướng chính bị chặn, thử hướng phụ
-  for (let move of tryMoves) {
-    let newGridX = mummy.gridX + move.x;
-    let newGridY = mummy.gridY + move.y;
-    if (grid[newGridY] && grid[newGridY][newGridX] !== 'W') {
-      mummy.gridX = newGridX;
-      mummy.gridY = newGridY;
-      mummy.x = mummy.gridX * tileSize + tileSize / 2;
-      mummy.y = mummy.gridY * tileSize + tileSize / 2;
-      return;
+  let found = false;
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (current.x === target.x && current.y === target.y) {
+      found = true;
+      break;
+    }
+
+    for (let dir of directions) {
+      const nextX = current.x + dir.x;
+      const nextY = current.y + dir.y;
+      if (
+        nextY >= 0 && nextY < rows &&
+        nextX >= 0 && nextX < cols &&
+        !visited[nextY][nextX] &&
+        grid[nextY][nextX] !== 'W'
+      ) {
+        visited[nextY][nextX] = true;
+        parent[nextY][nextX] = current;
+        queue.push({ x: nextX, y: nextY });
+      }
     }
   }
+
+  if (!found) {
+    return;
+  }
+
+  let step = target;
+  while (parent[step.y][step.x] && !(parent[step.y][step.x].x === start.x && parent[step.y][step.x].y === start.y)) {
+    step = parent[step.y][step.x];
+  }
+
+  if (step.x !== start.x || step.y !== start.y) {
+    mummy.gridX = step.x;
+    mummy.gridY = step.y;
+    mummy.x = mummy.gridX * tileSize + tileSize / 2;
+    mummy.y = mummy.gridY * tileSize + tileSize / 2;
+  }
+}
+
+function teleportPlayer() {
+  if (teleports.length < 2) {
+    return;
+  }
+
+  const currentGate = teleports.find(t => t.x === player.gridX && t.y === player.gridY);
+  if (!currentGate) {
+    return;
+  }
+
+  const otherGate = teleports.find(t => t.x !== currentGate.x || t.y !== currentGate.y);
+  if (!otherGate) {
+    return;
+  }
+
+  grid[currentGate.y][currentGate.x] = 'P';
+  grid[otherGate.y][otherGate.x] = 'P';
+  teleports = [];
+
+  if (teleportSound) {
+    try {
+      teleportSound.pause();
+      teleportSound.currentTime = 0;
+      teleportSound.volume = 0.5;
+      const playPromise = teleportSound.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => {});
+      }
+    } catch (error) {
+      // Ignore autoplay restrictions or playback errors.
+    }
+  }
+
+  player.gridX = otherGate.x;
+  player.gridY = otherGate.y;
+  player.x = player.gridX * tileSize + tileSize / 2;
+  player.y = player.gridY * tileSize + tileSize / 2;
 }
 
 // Xử lý va chạm giữa người chơi với gem, xác ướp và đích đến.
@@ -618,6 +766,22 @@ function updateTimer() {
   }
 }
 
+function showGameFeedback(message) {
+  let feedback = document.getElementById('feedback');
+  if (!feedback) {
+    feedback = document.createElement('div');
+    feedback.id = 'feedback';
+    document.body.appendChild(feedback);
+  }
+  feedback.innerText = message;
+  feedback.style.display = 'block';
+  feedback.style.zIndex = '2500';
+  clearTimeout(showGameFeedback.timeoutId);
+  showGameFeedback.timeoutId = setTimeout(() => {
+    feedback.style.display = 'none';
+  }, 1800);
+}
+
 // ==================== Module 6: Giao diện và logic giải câu đố ====================
 let decodeScreen = document.createElement('div');
 decodeScreen.id = 'decode-screen';
@@ -645,16 +809,19 @@ function showDecodeScreen() {
   }
 
   decodeScreen.style.display = 'block';
-  let shift = currentPuzzle.cipher_type === 'caesar' ? floor(random(1, 26)) : null;
-  if (currentPuzzle.cipher_type === 'caesar') {
+  const cipherType = (currentPuzzle.cipher_type || '').toLowerCase();
+  let shift = cipherType === 'caesar' ? floor(random(1, 26)) : null;
+  if (cipherType === 'caesar') {
     currentPuzzle.msg = caesarEncode(currentPuzzle.treasure, shift);
-  } else if (currentPuzzle.cipher_type === 'rsa') {
-    currentPuzzle.msg = "Encrypted RSA " + floor(random(1, 100));
-  } else if (currentPuzzle.cipher_type === 'aes') {
-    currentPuzzle.msg = "Encrypted AES " + floor(random(1, 100));
+  } else if (cipherType === 'rsa') {
+    currentPuzzle.msg = rsaEncode(currentPuzzle.treasure);
+  } else if (cipherType === 'aes') {
+    currentPuzzle.msg = aesEncode(currentPuzzle.treasure);
+  } else {
+    currentPuzzle.msg = "[Không xác định cipher]";
   }
-  document.getElementById('puzzle-question').innerText = currentPuzzle.question;
-  document.getElementById('puzzle-msg').innerText = currentPuzzle.msg;
+  document.getElementById('puzzle-question').innerText = currentPuzzle.question || '';
+  document.getElementById('puzzle-msg').innerText = currentPuzzle.msg || '';
 }
 
 // Ẩn popup câu đố và reset ô nhập để người chơi có thể tiếp tục di chuyển.
@@ -664,6 +831,73 @@ function hideDecodeScreen() {
   document.getElementById('decode-input').blur();
   document.getElementById('decode-input').value = '';
   window.focus();
+}
+
+// Tạo và hiển thị màn hình câu hỏi đặc biệt cho map 4.
+function showSpecialQuestionScreen() {
+  specialQuestionActive = true;
+  let screen = document.getElementById('special-question-screen');
+  if (!screen) {
+    screen = document.createElement('div');
+    screen.id = 'special-question-screen';
+    screen.style.cssText = `
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    `;
+    screen.innerHTML = `
+      <div style="background: white; padding: 24px 28px; border-radius: 10px; width: min(92vw, 420px); text-align: center; box-shadow: 0 0 20px rgba(0,0,0,0.35);">
+        <h3 style="margin-top: 0; color: #333;">Câu hỏi cuối cùng</h3>
+        <p style="margin: 12px 0; font-size: 1.05em; color: #444;">Bản chất của thế giới là gì?</p>
+        <input id="special-question-input" type="text" placeholder="Nhập câu trả lời" style="width: 100%; padding: 8px; box-sizing: border-box; margin-bottom: 12px;">
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <button onclick="submitSpecialQuestion()" style="padding: 8px 16px; border: none; border-radius: 5px; background: #667eea; color: white; cursor: pointer;">Xác nhận</button>
+          <button onclick="skipSpecialQuestion()" style="padding: 8px 16px; border: none; border-radius: 5px; background: #ff6b6b; color: white; cursor: pointer;">Bỏ qua</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(screen);
+  }
+  screen.style.display = 'flex';
+  const input = document.getElementById('special-question-input');
+  if (input) {
+    input.value = '';
+    input.focus();
+  }
+}
+
+function hideSpecialQuestionScreen() {
+  const screen = document.getElementById('special-question-screen');
+  if (screen) {
+    screen.style.display = 'none';
+  }
+  specialQuestionActive = false;
+}
+
+function submitSpecialQuestion() {
+  const input = document.getElementById('special-question-input').value.trim().toLowerCase();
+  if (input === 'code') {
+    score += 50;
+    levelScore += 50;
+    updateUI();
+  }
+  hideSpecialQuestionScreen();
+  finishSpecialMap4();
+}
+
+function skipSpecialQuestion() {
+  hideSpecialQuestionScreen();
+  finishSpecialMap4();
+}
+
+function finishSpecialMap4() {
+  gameCompleted = true;
+  updateUI();
+  showCompleteScreen();
 }
 
 // Hủy lời giải câu đố: đưa người chơi quay lại vị trí cũ và trả câu đố về hàng chờ.
@@ -713,7 +947,8 @@ function submitDecode() {
     hideDecodeScreen();
     mummyPauseSteps = 2; // Xác ướp đứng im 2 bước của người chơi sau khi giải xong
   } else {
-    feedback.innerText = "Giải mã thất bại. Hãy chọn thuật toán đúng và nhập chuỗi phù hợp.";
+    feedback.innerText = "Giải mã thất bại. Xác ướp đã đến gần bạn hơn.";
+    moveMummy();
   }
   feedback.style.display = 'block';
   setTimeout(() => feedback.style.display = 'none', 2000);
@@ -727,6 +962,26 @@ function caesarEncode(text, shift) {
     }
     return char;
   }).join('');
+}
+
+function rsaEncode(text) {
+  return text.toLowerCase().split('').map(char => {
+    if (char.match(/[a-z]/)) {
+      return char.charCodeAt(0).toString(16);
+    }
+    if (char === ' ') {
+      return '20';
+    }
+    return char;
+  }).join(' ');
+}
+
+function aesEncode(text) {
+  try {
+    return btoa(text.toLowerCase());
+  } catch (error) {
+    return text.toLowerCase().split('').map(char => char.charCodeAt(0).toString(16)).join('');
+  }
 }
 
 // ==================== Module 7: Tiện ích và màn hình kết thúc ====================
