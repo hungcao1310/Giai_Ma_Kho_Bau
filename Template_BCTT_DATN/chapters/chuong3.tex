@@ -68,6 +68,24 @@ Phục hồi tiến trình & 1 lần & Dữ liệu khôi phục chính xác. \\ 
 
 Phần nội dung này kế thừa ý tưởng từ một số mẫu game giáo dục trước đó về việc dùng trò chơi để minh họa các khái niệm mật mã. Nhóm tự nâng cấp bằng cách bổ sung các tác nhân tấn công giả định, các câu đố liên quan đến lỗ hổng bảo mật, bảng xếp hạng, lưu tiến trình và thiết kế giao diện gần với môi trường học tập thực tế.
 
+\begin{table}[H]
+\centering
+\caption{So sánh giữa phiên bản gốc và phiên bản nâng cấp}
+\label{tab:ke-thua-nang-cap}
+\begin{tabular}{|p{3.8cm}|p{4.5cm}|p{4.5cm}|}
+\hline
+\textbf{Tiêu chí} & \textbf{Phiên bản gốc} & \textbf{Phiên bản nâng cấp} \\ \hline
+Nguồn tham khảo & \url{https://github.com/luongdieu2624/Giai_Ma_kho_Bau} & \url{https://github.com/hungcao1310/Giai_Ma_Kho_Bau} \\ \hline
+Mục tiêu chính & Xây dựng trò chơi giáo dục đơn giản về giải mã kho báu. & Giữ nguyên mục tiêu giáo dục, đồng thời mở rộng thành sản phẩm báo cáo hoàn chỉnh và có cấu trúc chuyên nghiệp hơn. \\ \hline
+Nội dung kỹ thuật & Tập trung chủ yếu vào gameplay, bản đồ và câu đố mã hóa cơ bản. & Bổ sung tài liệu báo cáo, cấu trúc thư mục rõ ràng, hình ảnh minh họa và nội dung phân tích sâu hơn. \\ \hline
+Tính năng trò chơi & Có cơ chế di chuyển, thu thập gem và giải câu đố mã hóa. & Giữ lại các tính năng cốt lõi và bổ sung thêm bảng xếp hạng, lưu tiến trình, các tình huống tấn công giả định và câu đố liên quan đến lỗ hổng bảo mật. \\ \hline
+Giao diện & Giao diện đơn giản, tập trung vào trải nghiệm chơi. & Giao diện được trình bày rõ ràng hơn, gần với môi trường học tập thực tế và phù hợp cho mục đích báo cáo. \\ \hline
+Mức độ hoàn thiện & Mang tính minh họa ban đầu. & Mang tính hoàn thiện hơn về nội dung, tài liệu và khả năng trình bày trong đồ án. \\ \hline
+Ý nghĩa của việc kế thừa & Là nền tảng để tiếp tục phát triển. & Là phiên bản được kế thừa, mở rộng và nâng cấp theo hướng giáo dục bảo mật hiện đại. \\ \hline
+\end{tabular}
+\Nguon{So sánh dựa trên hai repository GitHub được tham khảo}
+\end{table}
+
 \section{Kết luận và hướng phát triển}
 
 Dự án đã hoàn thành được mục tiêu ban đầu là xây dựng một trò chơi giáo dục giúp người học hiểu được các nguyên lý bảo mật thông qua trải nghiệm trực quan. Tuy nhiên, hệ thống vẫn còn hạn chế ở chỗ chưa có lớp bảo mật phía server, chưa lưu trữ dữ liệu an toàn bằng cơ sở dữ liệu và chưa tích hợp xác thực người dùng hoặc kiểm soát phiên. Trong tương lai, nhóm có thể nâng cấp bằng cách thêm cơ chế xác thực, lưu trữ dữ liệu trên server, triển khai HTTPS, và mở rộng các bài học về bảo mật hiện đại như TLS, JWT, OAuth và bảo mật ứng dụng web.
