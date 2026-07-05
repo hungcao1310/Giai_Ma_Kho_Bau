@@ -1,17 +1,35 @@
 \appendix
 \UnnumberedChapter{PHỤ LỤC}
 
-\section*{Phụ lục 1. Hình ảnh minh họa}
-
-Sinh viên chèn hình ảnh minh họa, ảnh chụp màn hình sản phẩm hoặc giao diện hệ thống nếu được phép công bố.
-
-\section*{Phụ lục 2. Tài liệu, mã nguồn hoặc liên kết liên quan}
-
-Sinh viên có thể bổ sung:
+\section*{Phụ lục 1. Hình ảnh minh họa trò chơi}
 
 \begin{itemize}
-    \item Link GitHub/GitLab nếu được phép.
-    \item Tài liệu thiết kế.
-    \item Tài liệu hướng dẫn sử dụng.
-    \item File cài đặt hoặc tài liệu bàn giao.
+    \item Hình 1: Giao diện màn hình chủ (Home screen) với nút Start và bài nhạc nền.
+    \item Hình 2: Giao diện màn chơi (Ingame) với bản đồ 2D, nhân vật người chơi, gem, cửa ra, lava và xác ướp.
+    \item Hình 3: Popup câu đố Caesar Cipher yêu cầu người chơi chọn thuật toán và nhập đáp án.
+    \item Hình 4: Popup câu đố RSA với hướng dẫn sử dụng khóa công khai.
+    \item Hình 5: Popup câu đố phát hiện lỗ hổng bảo mật (Vulnerability Detection).
+    \item Hình 6: Bảng xếp hạng hiển thị điểm số và thời gian của người chơi.
+    \item Hình 7: Hộp thoại phục hồi tiến trình khi tải lại trang.
+    \item Hình 8: Màn hình kết thúc trò chơi với thông báo chiến thắng và tùy chọn nhập tên.
 \end{itemize}
+
+\section*{Phụ lục 2. Liên kết và mã nguồn}
+
+\begin{itemize}
+    \item Link GitHub: \url{https://github.com/hungcao1310/Giai_Ma_Kho_Bau.git}
+    \item File dữ liệu bản đồ: data/map1.json đến data/map5.json
+    \item File câu đố: data/puzzles.json
+    \item File khóa RSA: data/keys/private.pem, data/keys/public.pem
+    \item File âm thanh: data/song/ (theme\_song.mp3, Ingame\_song.mp3, ...)
+    \item File hình ảnh: data/picture/ (background.jpg, adventurer.png, ...)
+\end{itemize}
+
+\section*{Phụ lục 3. Hướng dẫn cài đặt và chạy trò chơi}
+
+\begin{enumerate}
+    \item Cài đặt Node.js (phiên bản 12 trở lên).
+    \item Mở terminal tại thư mục \texttt{game-treasure} và chạy lệnh: \texttt{npm install express}
+    \item Chạy lệnh: \texttt{node server.js}
+    \item Mở trình duyệt và truy cập: \url{http://localhost:3000}
+\end{enumerate}
