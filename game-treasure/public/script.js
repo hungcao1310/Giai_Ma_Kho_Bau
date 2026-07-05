@@ -94,6 +94,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { once: true });
   });
 
+  window.addEventListener('keydown', (event) => {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      event.preventDefault();
+    }
+  });
+
   if (homeScreen) {
     homeScreen.addEventListener('click', retryThemeSong);
     homeScreen.addEventListener('touchstart', retryThemeSong, { passive: true });
@@ -453,10 +459,36 @@ function preload() {
   });
 }
 
+function resizeCanvasToFit() {
+  const canvasEl = document.querySelector('#game-canvas canvas');
+  if (!canvasEl) return;
+
+  const parent = document.getElementById('game-canvas');
+  if (!parent) return;
+
+  const baseWidth = 12 * tileSize;
+  const baseHeight = 13 * tileSize;
+  const availableWidth = parent.clientWidth || baseWidth;
+  const availableHeight = parent.clientHeight || baseHeight;
+  const scale = Math.min(1, availableWidth / baseWidth, availableHeight / baseHeight);
+  const displayWidth = Math.max(1, Math.floor(baseWidth * scale));
+  const displayHeight = Math.max(1, Math.floor(baseHeight * scale));
+  canvasEl.style.width = `${displayWidth}px`;
+  canvasEl.style.height = `${displayHeight}px`;
+  canvasEl.style.maxWidth = '100%';
+  canvasEl.style.maxHeight = '100%';
+}
+
 function setup() {
   let canvas = createCanvas(12 * tileSize, 13 * tileSize);
   canvas.parent('game-canvas');
+  canvas.style('display', 'block');
+  resizeCanvasToFit();
   updateUI();
+}
+
+function windowResized() {
+  resizeCanvasToFit();
 }
 
 function draw() {
