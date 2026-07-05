@@ -358,6 +358,7 @@ let lavaBurnSound;
 let mummyBiteSound;
 let player = { x: 50, y: 550, speed: 0, size: 20, gridX: 1, gridY: 11, prevGridX: 1, prevGridY: 11 };
 let mummy = { x: 0, y: 0, gridX: 0, gridY: 0 };
+let mummies = [];
 let objectivePos = { x: 0, y: 0 };
 let grid = [];
 let gems = [];
@@ -389,7 +390,7 @@ let burnEffect = { active: false, x: 0, y: 0, particles: [] };
 let headFallEffect = { active: false, x: 0, y: 0, vx: 0, vy: 0, alpha: 255, life: 0 };
 const tileSize = 50;
 const levelScores = [10, 20, 30, 40];
-const puzzlePointsByLevel = [5, 10, 15, 20];
+const puzzlePointsByLevel = [5, 10, 15, 20, 20];
 const mapCompletionBonusByLevel = [10, 20, 30, 40];
 
 function getAudioContext() {
@@ -558,12 +559,70 @@ function findSafePath(startX, startY, targetX, targetY) {
   return [];
 }
 
+function isWalkableCell(x, y) {
+  return y >= 0 && y < grid.length && x >= 0 && x < grid[0].length && grid[y][x] !== 'W';
+}
+
+function placeMummiesForLevel(objectiveCell) {
+  const spawnPositions = [];
+  if (level === 5) {
+    const primary = objectiveCell || { x: 10, y: 1 };
+    const secondary = { x: 10, y: 10 };
+    spawnPositions.push(primary, secondary);
+  } else if (objectiveCell) {
+    spawnPositions.push(objectiveCell);
+  }
+
+  const nextMummies = [];
+  for (const position of spawnPositions) {
+    if (!position || !isWalkableCell(position.x, position.y)) continue;
+    const alreadyAdded = nextMummies.some(item => item.gridX === position.x && item.gridY === position.y);
+    if (!alreadyAdded) {
+      nextMummies.push({
+        x: position.x * tileSize + tileSize / 2,
+        y: position.y * tileSize + tileSize / 2,
+        gridX: position.x,
+        gridY: position.y
+      });
+    }
+  }
+
+  if (level === 5 && nextMummies.length < 2) {
+    const fallback = { x: 10, y: 10 };
+    if (isWalkableCell(fallback.x, fallback.y) && !nextMummies.some(item => item.gridX === fallback.x && item.gridY === fallback.y)) {
+      nextMummies.push({
+        x: fallback.x * tileSize + tileSize / 2,
+        y: fallback.y * tileSize + tileSize / 2,
+        gridX: fallback.x,
+        gridY: fallback.y
+      });
+    }
+  }
+
+  if (nextMummies.length === 0 && objectiveCell) {
+    nextMummies.push({
+      x: objectiveCell.x * tileSize + tileSize / 2,
+      y: objectiveCell.y * tileSize + tileSize / 2,
+      gridX: objectiveCell.x,
+      gridY: objectiveCell.y
+    });
+  }
+
+  mummies = nextMummies;
+  if (mummies.length > 0) {
+    mummy = { ...mummies[0] };
+  } else {
+    mummy = { x: 0, y: 0, gridX: 0, gridY: 0 };
+  }
+}
+
 // Khởi tạo các đối tượng trên bản đồ như gem, kẻ địch, lava và vị trí mục tiêu.
 function initElements() {
   gems = [];
   enemies = [];
   lava = [];
   teleports = [];
+  let objectiveCell = null;
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[y].length; x++) {
       if (grid[y][x] === 'G') gems.push({ x: x * tileSize + tileSize / 2, y: y * tileSize + tileSize / 2 });
@@ -572,13 +631,11 @@ function initElements() {
       if (grid[y][x] === 'T') teleports.push({ x, y });
       if (grid[y][x] === 'O' || (grid[y][x] === 'E' && level === 5)) {
         objectivePos = { x, y };
-        mummy.gridX = x;
-        mummy.gridY = y;
-        mummy.x = x * tileSize + tileSize / 2;
-        mummy.y = y * tileSize + tileSize / 2;
+        objectiveCell = { x, y };
       }
     }
   }
+  placeMummiesForLevel(objectiveCell);
 }
 
 // Vẽ lại toàn bộ bản đồ và các đối tượng nền theo dữ liệu grid hiện tại.
@@ -664,14 +721,17 @@ function drawPlayer() {
 
 // Vẽ xác ướp lên canvas và giữ nó luôn ở đúng vị trí tính toán.
 function drawMummy() {
-  if (mummyImage) {
-    const imgSize = 35;
-    imageMode(CENTER);
-    image(mummyImage, mummy.x, mummy.y, imgSize, imgSize);
-  } else {
-    fill(200, 150, 100);
-    ellipse(mummy.x, mummy.y, 30, 30);
-  }
+  const activeMummies = mummies.length > 0 ? mummies : [mummy];
+  activeMummies.forEach((mummyRef) => {
+    if (mummyImage) {
+      const imgSize = 35;
+      imageMode(CENTER);
+      image(mummyImage, mummyRef.x, mummyRef.y, imgSize, imgSize);
+    } else {
+      fill(200, 150, 100);
+      ellipse(mummyRef.x, mummyRef.y, 30, 30);
+    }
+  });
 }
 
 // ==================== Module 5: Di chuyển nhân vật và xác ướp ====================
@@ -772,6 +832,10 @@ function drawHeadFallEffect() {
 
 function keyPressed() {
   ensureAudioUnlocked();
+  if (gameOverFlag || gameCompleted) {
+    return;
+  }
+
   const decodeScreen = document.getElementById('decode-screen');
   const specialQuestionScreen = document.getElementById('special-question-screen');
   if ((decodeScreen && decodeScreen.style.display === 'block') || (specialQuestionScreen && specialQuestionScreen.style.display === 'flex')) {
@@ -826,10 +890,10 @@ function keyPressed() {
     }
 
     const currentTile = grid[player.gridY] && grid[player.gridY][player.gridX];
-    const map4SwitchesDone = gems.length === 0 && pendingPuzzles.length === 0 && currentPuzzles.length === 0;
+    const map5SpecialRequirementsDone = gems.length === 0 && pendingPuzzles.length === 0;
 
-    if (level === 5 && currentTile && currentTile === 'O') {
-      if (!map4SwitchesDone) {
+    if (level === 5 && currentTile && currentTile === 'E') {
+      if (!map5SpecialRequirementsDone) {
         showGameFeedback('Bạn chưa kích hoạt hết các công tắc');
       } else if (!specialQuestionActive) {
         showSpecialQuestionScreen();
@@ -863,61 +927,68 @@ function keyPressed() {
 
 // Di chuyển xác ướp theo đường đi hợp lệ tránh tường bằng BFS.
 function moveMummy() {
-  const start = { x: mummy.gridX, y: mummy.gridY };
-  const target = { x: player.gridX, y: player.gridY };
-  const rows = grid.length;
-  const cols = grid[0].length;
-  const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
-  const parent = Array.from({ length: rows }, () => Array(cols).fill(null));
-  const queue = [start];
-  visited[start.y][start.x] = true;
+  const activeMummies = mummies.length > 0 ? mummies : [mummy];
+  if (activeMummies.length === 0) return;
 
-  const directions = [
-    { x: 1, y: 0 },
-    { x: -1, y: 0 },
-    { x: 0, y: 1 },
-    { x: 0, y: -1 }
-  ];
+  activeMummies.forEach((mummyRef) => {
+    const start = { x: mummyRef.gridX, y: mummyRef.gridY };
+    const target = { x: player.gridX, y: player.gridY };
+    const rows = grid.length;
+    const cols = grid[0].length;
+    const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
+    const parent = Array.from({ length: rows }, () => Array(cols).fill(null));
+    const queue = [start];
+    visited[start.y][start.x] = true;
 
-  let found = false;
-  while (queue.length > 0) {
-    const current = queue.shift();
-    if (current.x === target.x && current.y === target.y) {
-      found = true;
-      break;
-    }
+    const directions = [
+      { x: 1, y: 0 },
+      { x: -1, y: 0 },
+      { x: 0, y: 1 },
+      { x: 0, y: -1 }
+    ];
 
-    for (let dir of directions) {
-      const nextX = current.x + dir.x;
-      const nextY = current.y + dir.y;
-      if (
-        nextY >= 0 && nextY < rows &&
-        nextX >= 0 && nextX < cols &&
-        !visited[nextY][nextX] &&
-        grid[nextY][nextX] !== 'W'
-      ) {
-        visited[nextY][nextX] = true;
-        parent[nextY][nextX] = current;
-        queue.push({ x: nextX, y: nextY });
+    let found = false;
+    while (queue.length > 0) {
+      const current = queue.shift();
+      if (current.x === target.x && current.y === target.y) {
+        found = true;
+        break;
+      }
+
+      for (let dir of directions) {
+        const nextX = current.x + dir.x;
+        const nextY = current.y + dir.y;
+        const isBlockedByOtherMummy = activeMummies.some(other => other !== mummyRef && other.gridX === nextX && other.gridY === nextY);
+        if (
+          nextY >= 0 && nextY < rows &&
+          nextX >= 0 && nextX < cols &&
+          !visited[nextY][nextX] &&
+          grid[nextY][nextX] !== 'W' &&
+          !isBlockedByOtherMummy
+        ) {
+          visited[nextY][nextX] = true;
+          parent[nextY][nextX] = current;
+          queue.push({ x: nextX, y: nextY });
+        }
       }
     }
-  }
 
-  if (!found) {
-    return;
-  }
+    if (!found) {
+      return;
+    }
 
-  let step = target;
-  while (parent[step.y][step.x] && !(parent[step.y][step.x].x === start.x && parent[step.y][step.x].y === start.y)) {
-    step = parent[step.y][step.x];
-  }
+    let step = target;
+    while (parent[step.y][step.x] && !(parent[step.y][step.x].x === start.x && parent[step.y][step.x].y === start.y)) {
+      step = parent[step.y][step.x];
+    }
 
-  if (step.x !== start.x || step.y !== start.y) {
-    mummy.gridX = step.x;
-    mummy.gridY = step.y;
-    mummy.x = mummy.gridX * tileSize + tileSize / 2;
-    mummy.y = mummy.gridY * tileSize + tileSize / 2;
-  }
+    if (step.x !== start.x || step.y !== start.y) {
+      mummyRef.gridX = step.x;
+      mummyRef.gridY = step.y;
+      mummyRef.x = mummyRef.gridX * tileSize + tileSize / 2;
+      mummyRef.y = mummyRef.gridY * tileSize + tileSize / 2;
+    }
+  });
 }
 
 function teleportPlayer() {
@@ -996,19 +1067,22 @@ function checkCollisions() {
       break;
     }
   }
-  // Kiểm tra va chạm với xác ướp
-  if (dist(player.x, player.y, mummy.x, mummy.y) < 25) {
-    playMummyBiteSound();
-    startHeadFallEffect(player.x, player.y);
-    gameOverFlag = true;
-    gameOverReason = 'mummy';
-    if (lostScreenTimeout) {
-      clearTimeout(lostScreenTimeout);
+  // Kiểm tra va chạm với các xác ướp
+  const activeMummies = mummies.length > 0 ? mummies : [mummy];
+  for (const mummyRef of activeMummies) {
+    if (dist(player.x, player.y, mummyRef.x, mummyRef.y) < 25) {
+      playMummyBiteSound();
+      startHeadFallEffect(player.x, player.y);
+      gameOverFlag = true;
+      gameOverReason = 'mummy';
+      if (lostScreenTimeout) {
+        clearTimeout(lostScreenTimeout);
+      }
+      lostScreenTimeout = setTimeout(() => {
+        showLostScreen();
+      }, 1000);
+      return;
     }
-    lostScreenTimeout = setTimeout(() => {
-      showLostScreen();
-    }, 1000);
-    return;
   }
   // Kiểm tra đến đích
   if (grid[player.gridY][player.gridX] === 'O' && levelScore >= levelScores[level - 1]) {
@@ -1123,6 +1197,8 @@ decodeScreen.style.display = 'none';
 function showDecodeScreen() {
   if (decodeScreen.style.display === 'block') return;
   decodeScreen.style.display = 'block';
+  decodeScreen.style.zIndex = '4000';
+  decodeScreen.style.pointerEvents = 'auto';
   const cipherType = (currentPuzzle.cipher_type || '').toLowerCase();
   const cleanedQuestion = cleanTechnicalHint(currentPuzzle.question || '');
   (async () => {
@@ -1283,7 +1359,7 @@ function getVulnHint(vulnType) {
   return hints[vulnType] || 'Nhập tên lỗ hổng phù hợp với nội dung câu hỏi.';
 }
 
-// Tạo và hiển thị màn hình câu hỏi đặc biệt cho map 4.
+// Tạo và hiển thị màn hình câu hỏi đặc biệt cho map 5.
 function showSpecialQuestionScreen() {
   specialQuestionActive = true;
   let screen = document.getElementById('special-question-screen');
@@ -1297,7 +1373,8 @@ function showSpecialQuestionScreen() {
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 2000;
+      z-index: 4000;
+      pointer-events: auto;
     `;
     screen.innerHTML = `
       <div style="background: white; padding: 24px 28px; border-radius: 10px; width: min(92vw, 420px); text-align: center; box-shadow: 0 0 20px rgba(0,0,0,0.35);">
@@ -1330,21 +1407,23 @@ function hideSpecialQuestionScreen() {
 
 function submitSpecialQuestion() {
   const input = document.getElementById('special-question-input').value.trim().toLowerCase();
-  if (input === 'code') {
-    score += 50;
-    levelScore += 50;
+  const answeredCorrectly = input === 'code' || input === 'code!';
+  if (answeredCorrectly) {
+    score += 100;
+    levelScore += 100;
     updateUI();
+    showGameFeedback('🎉 Bạn đã phá đảo trò chơi!');
   }
   hideSpecialQuestionScreen();
-  finishSpecialMap4();
+  finishSpecialMap5();
 }
 
 function skipSpecialQuestion() {
   hideSpecialQuestionScreen();
-  finishSpecialMap4();
+  finishSpecialMap5();
 }
 
-function finishSpecialMap4() {
+function finishSpecialMap5() {
   gameCompleted = true;
   updateUI();
   showCompleteScreen();
@@ -1466,12 +1545,12 @@ function saveProgress() {
         x: player.x,
         y: player.y
       },
-      mummy: {
-        gridX: mummy.gridX,
-        gridY: mummy.gridY,
-        x: mummy.x,
-        y: mummy.y
-      },
+      mummies: (mummies.length > 0 ? mummies : [mummy]).map(m => ({
+        gridX: m.gridX,
+        gridY: m.gridY,
+        x: m.x,
+        y: m.y
+      })),
       mummyPauseSteps,
       elapsedTime,
       gems: gems.map(g => ({ x: g.x, y: g.y })),
@@ -1529,10 +1608,13 @@ function applySavedProgress(saved) {
     player.x = saved.player.x;
     player.y = saved.player.y;
 
-    mummy.gridX = saved.mummy.gridX;
-    mummy.gridY = saved.mummy.gridY;
-    mummy.x = saved.mummy.x;
-    mummy.y = saved.mummy.y;
+    if (Array.isArray(saved.mummies) && saved.mummies.length > 0) {
+      mummies = saved.mummies.map(m => ({ x: m.x, y: m.y, gridX: m.gridX, gridY: m.gridY }));
+      mummy = { ...mummies[0] };
+    } else if (saved.mummy) {
+      mummy = { x: saved.mummy.x, y: saved.mummy.y, gridX: saved.mummy.gridX, gridY: saved.mummy.gridY };
+      mummies = [mummy];
+    }
     mummyPauseSteps = typeof saved.mummyPauseSteps === 'number' ? saved.mummyPauseSteps : 0;
 
     if (saved.gems && Array.isArray(saved.gems)) {
@@ -1668,13 +1750,8 @@ function resetGameState() {
     player.prevGridY = player.gridY;
     player.x = player.gridX * tileSize + tileSize / 2;
     player.y = player.gridY * tileSize + tileSize / 2;
-    // Đặt mummy ra xa người chơi tạm thời để tránh va chạm ngay khi restart
-    const cols = (grid && grid[0]) ? grid[0].length : 12;
-    const safeMummyX = Math.min(cols - 1, player.gridX + 3);
-    mummy.gridX = safeMummyX;
-    mummy.gridY = player.gridY;
-    mummy.x = mummy.gridX * tileSize + tileSize / 2;
-    mummy.y = mummy.gridY * tileSize + tileSize / 2;
+    mummies = [];
+    mummy = { x: 0, y: 0, gridX: 0, gridY: 0 };
   }
   const lostScreen = document.getElementById('lost-screen');
   if (lostScreen) {
@@ -1724,6 +1801,9 @@ function restartGame() {
 
 // Hiển thị màn hình hoàn thành trò chơi và cho phép người chơi nhập tên.
 function showCompleteScreen() {
+  savedProgressToResume = null;
+  clearProgress();
+
   let elapsedTime = Date.now() - startTime;
   let timeStr = formatTime(elapsedTime);
   

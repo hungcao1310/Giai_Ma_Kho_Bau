@@ -45,3 +45,9 @@
 - Thêm map 5 và nối map 4 sang map 5 bằng cửa `O` mới.
 - Cập nhật layout để game hiển thị vừa khít toàn bộ màn hình, loại bỏ tình trạng vượt quá kích thước viewport.
 - Điều chỉnh bố cục canvas và container để canvas phủ toàn bộ vùng chơi và không bị lệch hoặc tràn khỏi màn hình.
+- Sửa lỗi popup câu hỏi bị che bởi map bằng cách tăng lớp hiển thị và ưu tiên tương tác của popup trên canvas.
+- Thêm câu hỏi đặc biệt ở map 5 khi bước vào ô `E`: “Bản chất của thế giới là gì?”
+- Cập nhật logic map 5: nhập đúng `code!` sẽ cộng 100 điểm và phá đảo trò chơi; trả lời sai hoặc bỏ qua vẫn kết thúc trò chơi nhưng không cộng điểm.
+- Sửa lỗi ở map 5 vẫn báo “Bạn chưa kích hoạt hết các công tắc” dù người chơi đã hoàn thành các công tắc cần thiết.
+- Xóa tiến trình đã lưu khi người chơi phá đảo trò chơi thành công để tránh tiếp tục resume tiến trình cũ.
+- Loại bỏ các câu hỏi vulnerability trùng đáp án ở map 5 để mỗi đáp án chỉ xuất hiện một câu hỏi.
