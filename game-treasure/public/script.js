@@ -366,7 +366,7 @@ let enemies = [];
 let lava = [];
 let teleports = [];
 // Số level khởi đầu (map khởi đầu)
-let initialLevel = 5;
+let initialLevel = 1;
 let level = initialLevel;
 // Lưu vị trí bắt đầu cho mỗi map để có thể reset ngay lập tức
 let startPositions = {};
