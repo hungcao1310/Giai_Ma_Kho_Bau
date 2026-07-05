@@ -1,59 +1,73 @@
-\chapter{NỘI DUNG THỰC TẬP}
+\chapter{THIẾT KẾ, THUẬT TOÁN VÀ PHÂN TÍCH MÃ NGUỒN}
 
-\textit{Lưu ý: Sinh viên cần cập nhật báo cáo theo từng tuần dựa trên công việc thực tế đã thực hiện.}
+\section{Thiết kế luồng xử lý}
 
-\section{Mô tả công việc thực tập}
+Luồng xử lý của trò chơi đi theo các bước chính sau:
 
-Sinh viên mô tả tổng quan công việc được giao trong thời gian thực tập, bao gồm mục tiêu công việc, phạm vi công việc, công cụ sử dụng và sản phẩm/kết quả cần đạt được.
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=stealth,thick, every node/.style={align=center}]
+\node[draw, rounded corners, fill=blue!10] (start) at (0,0) {Bắt đầu};
+\node[draw, rounded corners, fill=blue!10] (map) at (0,-1.4) {Chọn màn chơi};
+\node[draw, rounded corners, fill=blue!10] (puzzle) at (0,-2.8) {Nhận câu đố};
+\node[draw, rounded corners, fill=blue!10] (check) at (0,-4.2) {Kiểm tra đáp án};
+\node[draw, rounded corners, fill=blue!10] (score) at (0,-5.6) {Cập nhật điểm và tiến trình};
+\node[draw, rounded corners, fill=blue!10] (end) at (0,-7.0) {Chuyển sang màn tiếp theo};
+\draw[->] (start) -- (map) -- (puzzle) -- (check) -- (score) -- (end);
+\end{tikzpicture}
+\caption{Luồng xử lý chính của trò chơi}
+\label{fig:flow-game}
+\end{figure}
 
-\section{Công việc thực tập}
+Trong mỗi màn chơi, người dùng di chuyển trên bản đồ, tương tác với gem và câu đố, sau đó nhập đáp án để nhận điểm. Nếu đáp án đúng thì trò chơi cho phép người chơi tiến tiếp; nếu sai thì người chơi có thể thử lại hoặc bị giới hạn bởi số lần nhập.
 
-Sinh viên trình bày chi tiết các nhóm công việc đã thực hiện. Ví dụ:
+\section{Thuật toán và thư viện sử dụng}
+
+Trò chơi sử dụng các thuật toán mô phỏng và minh họa mật mã cơ bản như Caesar, Vigenère, RSA và hash SHA-256. Một số tính năng đặc biệt như bảng xếp hạng và lưu tiến trình được triển khai bằng localStorage của trình duyệt. Máy chủ được xây dựng bằng Express để phục vụ tài nguyên tĩnh từ thư mục public và data.
 
 \begin{itemize}
-    \item Tìm hiểu quy trình phát triển phần mềm tại doanh nghiệp.
-    \item Cài đặt môi trường phát triển.
-    \item Tìm hiểu tài liệu yêu cầu, tài liệu thiết kế hoặc mã nguồn.
-    \item Tham gia xây dựng, kiểm thử hoặc bảo trì một chức năng cụ thể.
-    \item Viết tài liệu hướng dẫn sử dụng hoặc tài liệu kỹ thuật.
+    \item Mã hóa cổ điển: Caesar và Vigenère dùng để tạo câu đố phân biệt và dễ hiểu.
+    \item Mã hóa bất đối xứng: RSA được minh họa thông qua khóa công khai và khóa riêng.
+    \item Băm và toàn vẹn: SHA-256 dùng để tạo giá trị hash cho một số đoạn dữ liệu.
+    \item Quản lý khóa: khóa được lưu trong thư mục data/keys và data/puzzles.json.
+    \item Thư viện: Express, HTML5 Canvas và JavaScript thuần.
 \end{itemize}
 
-\section{Chi tiết nhật ký thực tập}
+\section{Mô tả chức năng đã cài đặt}
 
-Sinh viên có thể trình bày nhật ký thực tập theo bảng dưới đây.
+\subsection{Chức năng nền}
 
-\begin{longtable}{|c|p{3cm}|p{6cm}|p{4cm}|}
-\caption{Nhật ký thực tập}
-\label{tab:nhat-ky-thuc-tap} \\
-\hline
-\textbf{Tuần} & \textbf{Thời gian} & \textbf{Nội dung công việc} & \textbf{Kết quả đạt được} \\
-\hline
-\endfirsthead
+Game có cốt truyện tìm kho báu, người chơi giải câu đố mật mã, thu thập gem, di chuyển trên bản đồ và nâng cấp cấp độ. Ngoài ra còn có âm thanh nền, giao diện nhập tên, bảng xếp hạng và chức năng lưu tiến trình.
 
-\hline
-\textbf{Tuần} & \textbf{Thời gian} & \textbf{Nội dung công việc} & \textbf{Kết quả đạt được} \\
-\hline
-\endhead
+\subsection{Chức năng nâng cấp}
 
-1 & Từ ngày ... đến ngày ...
-& Tìm hiểu doanh nghiệp, phòng ban thực tập, quy trình làm việc.
-& Nắm được cơ cấu tổ chức, nội quy và công việc được giao. \\
-\hline
+Nhóm đã bổ sung các chức năng lưu trạng thái, bảng xếp hạng và các câu đố liên quan đến lỗ hổng bảo mật như replay, nonce reuse và hash không có salt. Những phần này giúp trò chơi không chỉ là mô phỏng thuật toán mà còn phản ánh các vấn đề bảo mật thực tế.
 
-2 & Từ ngày ... đến ngày ...
-& Cài đặt môi trường làm việc, tìm hiểu công nghệ sử dụng trong dự án.
-& Cài đặt thành công môi trường, chạy thử dự án mẫu. \\
-\hline
+\section{Phân tích mã nguồn}
 
-3 & Từ ngày ... đến ngày ...
-& Tham gia thực hiện một số nhiệm vụ được giao trong dự án.
-& Hoàn thành các công việc theo yêu cầu của người hướng dẫn. \\
-\hline
+\subsection{Cấu trúc thư mục}
 
-4 & Từ ngày ... đến ngày ...
-& Kiểm thử, chỉnh sửa lỗi, hoàn thiện tài liệu hoặc báo cáo kết quả.
-& Hoàn thiện sản phẩm/công việc được giao. \\
-\hline
+\begin{itemize}
+    \item game-treasure/public: chứa file giao diện HTML, CSS và JavaScript điều khiển trò chơi.
+    \item game-treasure/data: chứa bản đồ, câu đố, hình ảnh, âm thanh, khóa RSA và dữ liệu test.
+    \item game-treasure/server.js: máy chủ phục vụ ứng dụng.
+    \item game-treasure/package.json: khai báo dependency và script chạy chương trình.
+\end{itemize}
 
-\end{longtable}
-\Nguon{Sinh viên tổng hợp}
+\subsection{Các file và module chính}
+
+\begin{itemize}
+    \item public/index.html: định nghĩa giao diện, popup và canvas game.
+    \item public/script.js: triển khai logic trò chơi, điều khiển bản đồ, câu đố và leaderboard.
+    \item server.js: khởi động server Express trên cổng 3000.
+\end{itemize}
+
+\subsection{Cách chạy chương trình}
+
+Sau khi vào thư mục game-treasure, thực hiện lệnh:
+
+\begin{verbatim}
+node server.js
+\end{verbatim}
+
+Sau đó truy cập địa chỉ \url{http://localhost:3000/}. Mã nguồn đầy đủ có thể xem tại \url{https://github.com/hungcao1310/Giai_Ma_Kho_Bau.git}.
