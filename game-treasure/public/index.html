@@ -5,13 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Giải mã kho báu</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
+    html, body {
+      width: 100%;
+      height: 100%;
       margin: 0;
       padding: 0;
+      overflow: hidden;
+    }
+    body {
+      font-family: Arial, sans-serif;
       background-color: #f0f0f0;
       display: flex;
-      height: 100vh;
+      min-height: 100vh;
+      min-width: 100vw;
     }
     #game-info {
       position: absolute;
@@ -213,14 +219,113 @@
       padding: 20px;
     }
     #info-container {
-      width: 300px;
+      width: 320px;
       background-color: #fff;
       padding: 20px;
       border-left: 2px solid #ccc;
       overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    #explanation-panel {
+      background: linear-gradient(135deg, #fff7d6, #ffeaa7);
+      border: 1px solid #e2c66d;
+      border-radius: 10px;
+      padding: 14px 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    #explanation-panel h3 {
+      margin: 0 0 8px 0;
+      color: #7a4b00;
+      text-align: left;
+      font-size: 1.02em;
+    }
+    #explanation-text {
+      margin: 0;
+      color: #5a3b00;
+      line-height: 1.7;
+      font-size: 0.95em;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      display: flex;
+      min-height: 100vh;
+      min-width: 100vw;
+      flex-wrap: nowrap;
+      overflow: hidden;
+    }
+    #game-container {
+      display: none;
+      position: relative;
+      flex: 1 1 auto;
+      min-width: 0;
+      height: 100vh;
+      max-width: calc(100vw - 320px);
+      background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('../data/picture/sand.jpg');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      overflow: hidden;
+    }
+    #info-container {
+      flex: 0 0 320px;
+      width: 320px;
+      max-height: 100vh;
+      overflow-y: auto;
+      background-color: #fff;
+      padding: 20px;
+      border-left: 2px solid #ccc;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
     }
     #game-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       border: 2px solid #333;
+      box-sizing: border-box;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1;
+    }
+    #game-canvas canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+    }
+    #game-container h1 {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2001;
+      margin: 0;
+    }
+    #save-progress-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 2002;
+      padding: 10px 16px;
+      background-color: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95em;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+    #save-progress-btn:hover {
+      background-color: #ff5252;
     }
     #decode-screen {
       position: fixed;
@@ -354,6 +459,23 @@
       text-align: center;
       font-size: 2em;
     }
+    #save-progress-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 2002;
+      padding: 10px 16px;
+      background-color: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95em;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+    #save-progress-btn:hover {
+      background-color: #ff5252;
+    }
   </style>
 </head>
 <body>
@@ -433,6 +555,7 @@
   </div>
   <div id="game-container">
     <h1>Giải mã kho báu</h1>
+    <button id="save-progress-btn" type="button">Lưu tiến trình</button>
     <div id="game-canvas" style="position: relative;"></div>
     <div id="game-info">
       <p>
@@ -444,26 +567,10 @@
     </div>
   </div>
   <div id="info-container">
-    <h2>Giới thiệu trò chơi</h2>
-    <p>"Giải mã kho báu" là một trò chơi phiêu lưu kết hợp giải đố. Người chơi điều khiển nhân vật thu thập các viên ngọc (gem) để nhận câu đố mã hóa. Mỗi câu đố yêu cầu bạn chọn đúng thuật toán (Caesar, Vigenère, RSA, hoặc AES) và giải mã thông điệp để ghi điểm.</p>
-    <h3>Cách chơi:</h3>
-    <ul>
-      <li>Sử dụng các phím mũi tên để di chuyển nhân vật.</li>
-      <li>Thu thập gem để nhận câu đố.</li>
-      <li>Giải mã câu đố bằng cách nhập đáp án đúng.</li>
-      <li>Đạt đủ điểm để mở cửa và tiến đến cấp độ tiếp theo.</li>
-      <li>Tránh kẻ thù và lava để không bị thua!</li>
-    </ul>
-    <h3>Tính điểm:</h3>
-    <p>Mỗi câu đố giải đúng được 10 điểm. Điểm yêu cầu để qua từng cấp độ:</p>
-    <ul>
-      <li>Cấp 1: 10 điểm</li>
-      <li>Cấp 2: 20 điểm</li>
-      <li>Cấp 3: 30 điểm</li>
-      <li>Cấp 4: 50 điểm</li>
-    </ul>
-    <h3>Thời gian:</h3>
-    <p>Thời gian được tính từ khi bắt đầu mỗi cấp độ. Hoàn thành cấp độ nhanh để thử thách bản thân!</p>
+    <div id="explanation-panel">
+      <h3>Giải thích câu trả lời</h3>
+      <p id="explanation-text">Giải thích sẽ xuất hiện ở đây sau khi bạn hoàn thành một câu đố đúng.</p>
+    </div>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
   <script src="script.js"></script>

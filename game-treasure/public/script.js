@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('start-btn');
   const homeBtn = document.getElementById('home-btn');
+  const saveProgressBtn = document.getElementById('save-progress-btn');
   const introBtn = document.getElementById('intro-btn');
   const closeIntroBtn = document.getElementById('close-intro-btn');
   const saveNameBtn = document.getElementById('save-name-btn');
@@ -31,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const attemptPlayThemeSong = async () => {
     if (!themeSong || audioStarted) return true;
+    if (typeof suppressThemePlay !== 'undefined' && suppressThemePlay) return false;
 
     try {
       themeSong.load();
@@ -65,6 +67,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Hiển thị leaderboard khi trang load
   displayLeaderboard();
 
+  const saved = loadProgress();
+  if (saved) {
+    savedProgressToResume = saved;
+  }
+
   if (themeSong) {
     attemptPlayThemeSong();
   }
@@ -95,13 +102,39 @@ document.addEventListener('DOMContentLoaded', () => {
   
   if (startBtn) {
     startBtn.addEventListener('click', () => {
+      suppressThemePlay = true;
+      setTimeout(() => { suppressThemePlay = false; }, 1200);
+
+      const saved = savedProgressToResume || loadProgress();
+      if (saved) {
+        const shouldResume = confirm('Bạn có muốn tiếp tục cuộc hành trình trước đó không?');
+        if (shouldResume) {
+          level = saved.level || initialLevel;
+          score = saved.score || 0;
+          levelScore = saved.levelScore || 0;
+          playIngameSong();
+          gameCompleted = false;
+          gameOverFlag = false;
+          resumeSavedProgress(saved);
+          return;
+        }
+
+        clearProgress();
+        savedProgressToResume = null;
+      }
+
+      level = initialLevel;
       playIngameSong();
       gameCompleted = false;
       gameOverFlag = false;
-      document.getElementById('home-screen').style.display = 'none';
-      document.getElementById('game-container').style.display = 'flex';
-      document.getElementById('info-container').style.display = 'none';
-      startTime = Date.now(); // Bắt đầu đếm thời gian
+      resetGameState();
+    });
+  }
+
+  if (saveProgressBtn) {
+    saveProgressBtn.addEventListener('click', () => {
+      saveProgress();
+      showGameFeedback('✅ Tiến trình đã được lưu');
     });
   }
   
@@ -162,6 +195,8 @@ function closeLeaderboard() {
 let startTime = 0;
 let gameCompleted = false;
 let playerCount = parseInt(localStorage.getItem('playerCount')) || 0;
+let savedProgressToResume = null;
+let lastPuzzleExplanation = '';
 
 // Chuyển đổi thời gian từ chuỗi mm:ss sang mili giây để so sánh và lưu điểm.
 function parseTimeString(timeStr) {
@@ -329,13 +364,20 @@ let gems = [];
 let enemies = [];
 let lava = [];
 let teleports = [];
-let level = 2;
+// Số level khởi đầu (map khởi đầu)
+let initialLevel = 5;
+let level = initialLevel;
+// Lưu vị trí bắt đầu cho mỗi map để có thể reset ngay lập tức
+let startPositions = {};
+// Nếu true thì tạm thời chặn việc phát `themeSong` (tránh race khi bấm Start)
+let suppressThemePlay = false;
 let score = 0;
 let levelScore = 0;
 let currentPuzzles = []; 
 let currentPuzzle = {};
 let pendingPuzzles = [];
 let puzzles = [];
+let rsaKey = {};
 let gameOverFlag = false;
 let gameOverReason = '';
 let lostScreenTimeout = null;
@@ -385,21 +427,24 @@ function playLavaBurnSound() {
 
 // ==================== Module 4: Tải bản đồ, ảnh và dữ liệu câu đố ====================
 function preload() {
-  playerImage = loadImage('data/picture/adventurer.png');
-  mummyImage = loadImage('data/picture/mummy.png');
-  wallImage = loadImage('data/picture/wall.png');
-  lavaImage = loadImage('data/picture/lava.jpg');
-  leverImage = loadImage('data/picture/lever.png');
-  stairImage = loadImage('data/picture/stair.png');
-  tpImage = loadImage('data/picture/tp.png');
-  treasureImage = loadImage('data/picture/treasure.png');
-  loadJSON('data/puzzles.json', (data) => {
+  playerImage = loadImage('../data/picture/adventurer.png');
+  mummyImage = loadImage('../data/picture/mummy.png');
+  wallImage = loadImage('../data/picture/wall.png');
+  lavaImage = loadImage('../data/picture/lava.jpg');
+  leverImage = loadImage('../data/picture/lever.png');
+  stairImage = loadImage('../data/picture/stair.png');
+  tpImage = loadImage('../data/picture/tp.png');
+  treasureImage = loadImage('../data/picture/treasure.png');
+  loadJSON('../data/puzzles.json', (data) => {
     puzzles = data.levels;
+    rsaKey = data.rsa_key || {};
   });
-  loadJSON(`data/map${level}.json`, (data) => {
+  loadJSON(`../data/map${level}.json`, (data) => {
     grid = data.grid;
     player.gridX = data.start.x;
     player.gridY = data.start.y;
+    // Lưu vị trí bắt đầu cho level này
+    startPositions[level] = { x: data.start.x, y: data.start.y };
     player.x = player.gridX * tileSize + tileSize / 2;
     player.y = player.gridY * tileSize + tileSize / 2;
     initElements();
@@ -437,18 +482,24 @@ function draw() {
   updateTimer();
 }
 
-function initMap(level) {
-  loadJSON(`data/map${level}.json`, (data) => {
+function initMap(level, callback) {
+  loadJSON(`../data/map${level}.json`, (data) => {
     grid = data.grid;
     player.gridX = data.start.x;
     player.gridY = data.start.y;
+    // Lưu vị trí bắt đầu để có thể reset ngay lập tức
+    startPositions[level] = { x: data.start.x, y: data.start.y };
     player.prevGridX = player.gridX;
     player.prevGridY = player.gridY;
     player.x = player.gridX * tileSize + tileSize / 2;
     player.y = player.gridY * tileSize + tileSize / 2;
     initElements();
-    resetPuzzles();
-    updateUI();
+    if (typeof callback === 'function') {
+      callback();
+    } else {
+      resetPuzzles();
+      updateUI();
+    }
   });
 }
 
@@ -516,10 +567,10 @@ function initElements() {
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[y].length; x++) {
       if (grid[y][x] === 'G') gems.push({ x: x * tileSize + tileSize / 2, y: y * tileSize + tileSize / 2 });
-      if (grid[y][x] === 'E' && level !== 4) enemies.push({ x: x * tileSize + tileSize / 2, y: y * tileSize + tileSize / 2 });
+      if (grid[y][x] === 'E' && level !== 5) enemies.push({ x: x * tileSize + tileSize / 2, y: y * tileSize + tileSize / 2 });
       if (grid[y][x] === 'L') lava.push({ x: x * tileSize, y: y * tileSize, w: tileSize, h: tileSize });
       if (grid[y][x] === 'T') teleports.push({ x, y });
-      if (grid[y][x] === 'O' || (grid[y][x] === 'E' && level === 4)) {
+      if (grid[y][x] === 'O' || (grid[y][x] === 'E' && level === 5)) {
         objectivePos = { x, y };
         mummy.gridX = x;
         mummy.gridY = y;
@@ -548,7 +599,7 @@ function drawMap() {
         // Sand color for platforms and items
         fill(237, 201, 175);
         rect(posX, posY, tileSize, tileSize);
-      } else if (grid[y][x] === 'E' && level === 4) {
+      } else if (grid[y][x] === 'E' && level === 5) {
         if (typeof treasureImage !== 'undefined' && treasureImage) {
           imageMode(CORNER);
           image(treasureImage, posX, posY, tileSize, tileSize);
@@ -661,7 +712,8 @@ function updateBurnEffect() {
 
 function drawBurnEffect() {
   if (!burnEffect.active) return;
-
+  // Apply noStroke only within this block so global stroke state is preserved
+  push();
   noStroke();
   burnEffect.particles.forEach(particle => {
     push();
@@ -677,6 +729,7 @@ function drawBurnEffect() {
   rotate(-0.3);
   fill(255, 90, 40, 120);
   triangle(-10, 10, 10, 10, 0, -12);
+  pop();
   pop();
 }
 
@@ -775,10 +828,10 @@ function keyPressed() {
     const currentTile = grid[player.gridY] && grid[player.gridY][player.gridX];
     const map4SwitchesDone = gems.length === 0 && pendingPuzzles.length === 0 && currentPuzzles.length === 0;
 
-    if (level === 4 && currentTile && (currentTile === 'O' || currentTile === 'E')) {
+    if (level === 5 && currentTile && currentTile === 'O') {
       if (!map4SwitchesDone) {
         showGameFeedback('Bạn chưa kích hoạt hết các công tắc');
-      } else if (currentTile === 'E' && !specialQuestionActive) {
+      } else if (!specialQuestionActive) {
         showSpecialQuestionScreen();
         return;
       }
@@ -961,7 +1014,7 @@ function checkCollisions() {
   if (grid[player.gridY][player.gridX] === 'O' && levelScore >= levelScores[level - 1]) {
     score += mapCompletionBonusByLevel[level - 1];
     updateUI();
-    if (level < 4) {
+    if (level < 5) {
       level++;
       levelScore = 0;
       currentPuzzles = []; 
@@ -969,6 +1022,7 @@ function checkCollisions() {
       currentPuzzle = {};
       initMap(level);
       updateUI();
+      saveProgress();
     } else {
       // Hoàn thành game - hiển thị màn hình hoàn thành
       gameCompleted = true;
@@ -1008,18 +1062,55 @@ function showGameFeedback(message) {
   }, 1800);
 }
 
+function showPuzzleExplanation(puzzle, answer) {
+  const panel = document.getElementById('explanation-panel');
+  const text = document.getElementById('explanation-text');
+  if (!panel || !text || !puzzle) return;
+
+  const cipherType = (puzzle.cipher_type || '').toLowerCase();
+  const treasure = (puzzle.treasure || '').toString();
+  const normalizedAnswer = (answer || treasure).toString().trim();
+  const keyText = (puzzle.key || '').toString().trim();
+  let explanation = `Đáp án đúng là <strong>${treasure}</strong>.`;
+
+  if (cipherType === 'caesar') {
+    explanation = `Đây là câu đố Caesar và cách giải diễn ra theo từng bước. Bước 1: xác định rằng thông điệp được mã hóa bằng phép dịch chữ cái, mỗi ký tự đều bị dịch cùng một số vị trí. Bước 2: xem xét chuỗi mã hóa để tìm khoảng dịch dùng cho toàn bộ đoạn văn. Bước 3: dịch ngược từng ký tự lùi lại đúng số bước đó để phục hồi bản rõ. Kết quả cuối cùng là <strong>${treasure}</strong>, vì đây là từ đúng được che giấu bằng thuật toán Caesar.`;
+  } else if (cipherType === 'vigenere') {
+    explanation = `Đây là câu đố Vigenère, nên cách giải cần theo từng bước. Bước 1: nhận ra rằng mật mã không dùng một khoảng dịch cố định mà dùng một khóa lặp lại. Khóa đang dùng là <strong>${keyText || 'không xác định'}</strong>. Bước 2: xác định khóa rồi áp dụng nó theo thứ tự: ký tự đầu dùng khóa đầu, ký tự thứ hai dùng khóa thứ hai, rồi lặp lại chu kỳ đó. Bước 3: để giải ngược, ta dịch từng ký tự lùi lại đúng bằng số lần được quy định bởi khóa tương ứng, tức là trừ đi giá trị của mỗi chữ cái khóa để tìm bản rõ. Vì vậy đáp án đúng là <strong>${treasure}</strong>.`;
+  } else if (cipherType === 'rsa') {
+    explanation = `Đây là câu đố RSA, và cách giải cần đi theo từng bước rõ ràng. Bước 1: nhận ra đây là bài toán mã hóa bất đối xứng, nơi dữ liệu được mã hóa bằng khóa công khai và chỉ mở được bằng khóa riêng. Bước 2: hiểu rằng tất cả câu đố RSA trong game dùng chung một khóa, không phải mỗi câu một khóa riêng. Khóa chung này được lưu trong data, cụ thể là file data/puzzles.json. Bước 3: lấy ciphertext và áp dụng giải mã RSA với khóa riêng tương ứng sẽ phục hồi bản rõ ban đầu. Như vậy đáp án đúng là <strong>${treasure}</strong>.`;
+  } else if (cipherType === 'aes') {
+    explanation = `Đây là câu đố AES, một thuật toán mã hóa khối hiện đại. Bước 1: nhận diện rằng dữ liệu đã được mã hóa theo một khối AES và chỉ khóa đúng mới giải được. Bước 2: để truy ngược, ta lấy ciphertext hiện có và đưa vào quy trình giải mã AES cùng khóa tương ứng. Bước 3: quá trình giải mã AES được thực hiện qua nhiều vòng (round) của thuật toán. Mỗi round gồm các bước nội bộ như thay thế byte, dịch hàng, trộn cột và thêm khóa con. Khi giải mã, quá trình này chạy ngược lại: bắt đầu từ ciphertext, mỗi round giải mã đưa dữ liệu gần hơn về cấu trúc ban đầu, loại bỏ lớp trộn và lùi lại phép thay thế để phục hồi dữ liệu gốc. Sau round cuối cùng, AES sẽ trả về bản rõ ban đầu và từ đó ta biết được đáp án. Nói rõ hơn: ciphertext + khóa AES → giải mã AES qua các round → kết quả là plaintext phục hồi → plaintext đó chính là đáp án. Vì vậy đáp án đúng là <strong>${treasure}</strong>.`;
+  } else if (cipherType === 'hash') {
+    explanation = `Đây là câu đố kiểm tra toàn vẹn bằng hàm băm SHA-256, nên giải thích cũng cần rõ những bước xác minh. Bước 1: hiểu rằng hàm băm tạo ra một giá trị rút gọn từ dữ liệu đầu vào và không thể đảo ngược thành dữ liệu gốc. Bước 2: so sánh giá trị băm đã cho với giá trị băm bạn tính được từ dữ liệu gốc hoặc chuỗi mô tả. Bước 3: nếu hai giá trị trùng nhau, dữ liệu nguyên vẹn và đáp án là <strong>OK</strong>; nếu khác nhau, dữ liệu đã bị chỉnh sửa và đáp án là <strong>TAMPERED</strong>.`;
+  } else if (cipherType === 'vuln') {
+    const answers = (puzzle.vuln_answers || []).map(item => item.toString()).join(', ');
+    explanation = `Đây là câu đố phát hiện lỗ hổng bảo mật và cách hiểu cần được trình bày từng bước. Bước 1: đọc kỹ mô tả để xác định hành vi bất thường hoặc mô tả về dữ liệu. Bước 2: chọn loại lỗ hổng phù hợp với hành vi đó, ví dụ replay attack, nonce reuse hoặc hash không có salt. Bước 3: đối chiếu với các cách khai thác tương ứng và chọn tên lỗ hổng chính xác. Đáp án đúng là <strong>${answers}</strong>.`;
+  }
+
+  lastPuzzleExplanation = explanation;
+  text.innerHTML = explanation;
+  panel.style.display = 'block';
+  panel.style.visibility = 'visible';
+  panel.hidden = false;
+}
+
 // ==================== Module 6: Giao diện và logic giải câu đố ====================
 let decodeScreen = document.createElement('div');
 decodeScreen.id = 'decode-screen';
 decodeScreen.innerHTML = `
   <h3>Giải mã câu đố</h3>
   <p>Câu hỏi: <span id="puzzle-question"></span></p>
-  <p>Chuỗi mã hóa: <span id="puzzle-msg"></span></p>
+  <p id="puzzle-msg-row"><span id="puzzle-msg-label">Chuỗi mã hóa:</span> <span id="puzzle-msg"></span></p>
+  <p id="puzzle-help" style="color:#333; font-size:0.95em; margin-top:6px;"></p>
+  <p id="puzzle-key" style="white-space: pre-wrap; color:#222; font-size:0.95em; margin-top:8px;"></p>
   <select id="cipher-type">
     <option value="caesar">Caesar Cipher</option>
     <option value="vigenere">Vigenère Cipher</option>
     <option value="rsa">RSA</option>
     <option value="aes">AES</option>
+    <option value="hash">Hash / Integrity</option>
+    <option value="vuln">Vulnerability Detection</option>
   </select>
   <input type="text" id="decode-input" placeholder="Nhập chuỗi giải mã">
   <button onclick="submitDecode()">Xác nhận</button>
@@ -1030,24 +1121,94 @@ decodeScreen.style.display = 'none';
 
 // Hiển thị popup câu đố và tạo chuỗi mã hóa tương ứng với loại cipher đang dùng.
 function showDecodeScreen() {
-  if (decodeScreen.style.display === 'block') {
-    return;
-  }
-
+  if (decodeScreen.style.display === 'block') return;
   decodeScreen.style.display = 'block';
   const cipherType = (currentPuzzle.cipher_type || '').toLowerCase();
-  let shift = cipherType === 'caesar' ? floor(random(1, 26)) : null;
-  if (cipherType === 'caesar') {
-    currentPuzzle.msg = caesarEncode(currentPuzzle.treasure, shift);
-  } else if (cipherType === 'rsa') {
-    currentPuzzle.msg = rsaEncode(currentPuzzle.treasure);
-  } else if (cipherType === 'aes') {
-    currentPuzzle.msg = aesEncode(currentPuzzle.treasure);
-  } else {
-    currentPuzzle.msg = "[Không xác định cipher]";
-  }
-  document.getElementById('puzzle-question').innerText = currentPuzzle.question || '';
-  document.getElementById('puzzle-msg').innerText = currentPuzzle.msg || '';
+  const cleanedQuestion = cleanTechnicalHint(currentPuzzle.question || '');
+  (async () => {
+    if (cipherType === 'caesar') {
+      let shift = Math.floor(Math.random() * 25) + 1;
+      currentPuzzle.msg = caesarEncode(currentPuzzle.treasure, shift);
+    } else if (cipherType === 'vigenere') {
+      const key = Math.random().toString(36).slice(2, 7);
+      currentPuzzle.key = key;
+      currentPuzzle.msg = vigenereEncode(currentPuzzle.treasure, key);
+    } else if (cipherType === 'rsa') {
+      currentPuzzle.msg = rsaEncode(currentPuzzle.treasure);
+    } else if (cipherType === 'aes') {
+      const key = Math.random().toString(36).slice(2, 10);
+      currentPuzzle.aesKey = key;
+      currentPuzzle.msg = aesEncode(currentPuzzle.treasure, key);
+    } else if (cipherType === 'hash') {
+      const msgToShow = currentPuzzle.note && currentPuzzle.note.includes('message=') ? currentPuzzle.note.split('message=')[1].split(',')[0].replace(/\"/g, '') : currentPuzzle.treasure;
+      const hex = await sha256Hex(msgToShow);
+      currentPuzzle.msg = `${msgToShow} | SHA256: ${hex}`;
+    } else if (cipherType === 'vuln') {
+      currentPuzzle.msg = currentPuzzle.note || getVulnHint(currentPuzzle.vuln_type);
+    } else {
+      currentPuzzle.msg = "[Không xác định cipher]";
+    }
+    document.getElementById('puzzle-question').innerText = cleanedQuestion;
+    document.getElementById('puzzle-msg').innerText = currentPuzzle.msg || '';
+    const msgLabel = document.getElementById('puzzle-msg-label');
+    if (msgLabel) {
+      if (cipherType === 'hash') {
+        msgLabel.innerText = 'Dữ liệu kiểm tra:';
+      } else if (cipherType === 'vuln') {
+        msgLabel.innerText = 'Manh mối / dữ liệu:';
+      } else {
+        msgLabel.innerText = 'Chuỗi mã hóa:';
+      }
+    }
+    const helpEl = document.getElementById('puzzle-help');
+    if (helpEl) {
+      if (cipherType === 'vuln') {
+        helpEl.innerText = currentPuzzle.note ? '' : 'Nhập tên lỗ hổng hoặc mô tả ngắn (ví dụ: "nonce reuse", "replay attack").';
+      } else if (cipherType === 'hash') {
+        helpEl.innerText = 'Hướng dẫn: kiểm tra chuỗi dữ liệu và trả "OK" nếu hợp lệ hoặc "TAMPERED" nếu bị thay đổi.';
+      } else if (cipherType === 'rsa') {
+        helpEl.innerHTML = rsaKey.description ? `Khóa RSA chung đang được lưu ở: ${rsaKey.description}. <a href="#" id="reveal-rsa-key-link">Xem khóa RSA</a>` : 'Khóa RSA chung đang được lưu trong thư mục data/keys. <a href="#" id="reveal-rsa-key-link">Xem khóa RSA</a>';
+        const rsaLink = document.getElementById('reveal-rsa-key-link');
+        if (rsaLink) {
+          rsaLink.addEventListener('click', (event) => {
+            event.preventDefault();
+            revealRsaKey();
+          });
+        }
+      } else if (cipherType === 'aes') {
+        if (currentPuzzle.aesKey) {
+          helpEl.innerHTML = `Khóa AES hiện được tạo ngẫu nhiên. <a href="#" id="reveal-aes-key-link">Xem khóa AES</a>`;
+          const aesLink = document.getElementById('reveal-aes-key-link');
+          if (aesLink) {
+            aesLink.addEventListener('click', (event) => {
+              event.preventDefault();
+              revealAesKey();
+            });
+          }
+        } else {
+          helpEl.innerText = 'Hướng dẫn: đây là AES Cipher, khóa sẽ được tạo tự động và ẩn để người chơi xem khi cần.';
+        }
+      } else if (cipherType === 'vigenere') {
+        if (currentPuzzle.key) {
+          helpEl.innerHTML = `Hướng dẫn: khóa đang dùng được ẩn. <a href="#" id="reveal-vigenere-key-link">Xem khóa</a>`;
+          const vigenereLink = document.getElementById('reveal-vigenere-key-link');
+          if (vigenereLink) {
+            vigenereLink.addEventListener('click', (event) => {
+              event.preventDefault();
+              revealVigenereKey();
+            });
+          }
+        } else {
+          helpEl.innerText = 'Hướng dẫn: đây là Vigenère Cipher, hãy chú ý đến khóa lặp lại.';
+        }
+      } else {
+        helpEl.innerText = '';
+      }
+    }
+    // Set cipher selector to the puzzle's type for clarity
+    const sel = document.getElementById('cipher-type');
+    if (sel) sel.value = currentPuzzle.cipher_type || '';
+  })();
 }
 
 // Ẩn popup câu đố và reset ô nhập để người chơi có thể tiếp tục di chuyển.
@@ -1056,7 +1217,70 @@ function hideDecodeScreen() {
   // Blur input field để phím mũi tên hoạt động bình thường
   document.getElementById('decode-input').blur();
   document.getElementById('decode-input').value = '';
+  const helpEl = document.getElementById('puzzle-help');
+  if (helpEl) helpEl.innerText = '';
+  const keyEl = document.getElementById('puzzle-key');
+  if (keyEl) keyEl.innerHTML = '';
   window.focus();
+}
+
+function escapeHtml(text) {
+  return text.replace(/[&<>"']/g, ch => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[ch]));
+}
+
+function revealVigenereKey() {
+  const keyEl = document.getElementById('puzzle-key');
+  if (!keyEl) return;
+  keyEl.innerText = `Khóa Vigenère hiện tại: ${currentPuzzle.key}`;
+}
+
+function revealAesKey() {
+  const keyEl = document.getElementById('puzzle-key');
+  if (!keyEl) return;
+  keyEl.innerText = `Khóa AES hiện tại: ${currentPuzzle.aesKey}`;
+}
+
+function revealRsaKey() {
+  const keyEl = document.getElementById('puzzle-key');
+  if (!keyEl) return;
+  const publicPath = rsaKey.public_key_path ? `../data/${rsaKey.public_key_path}` : '../data/keys/public.pem';
+  const privatePath = rsaKey.private_key_path ? `../data/${rsaKey.private_key_path}` : '../data/keys/private.pem';
+  keyEl.innerText = 'Đang tải khóa RSA...';
+
+  const fetchText = (path) => fetch(path).then(response => {
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.text();
+  });
+
+  Promise.all([fetchText(publicPath), fetchText(privatePath)])
+    .then(([publicKey, privateKey]) => {
+      keyEl.innerHTML = `<strong>Public key RSA:</strong><pre>${escapeHtml(publicKey)}</pre><strong>Private key RSA:</strong><pre>${escapeHtml(privateKey)}</pre>`;
+    })
+    .catch(() => {
+      keyEl.innerText = 'Không thể tải khóa RSA. Vui lòng kiểm tra lại đường dẫn hoặc server.';
+    });
+}
+
+function cleanTechnicalHint(text) {
+  return text.replace(/\s*\(câu hỏi kĩ thuật:[^)]*\)\s*/gi, '').trim();
+}
+
+function getVulnHint(vulnType) {
+  if (!vulnType) {
+    return 'Nhập tên lỗ hổng hoặc mô tả ngắn phù hợp với câu hỏi.';
+  }
+  const hints = {
+    replay: 'Đặc điểm: cùng một giao dịch, tin nhắn hoặc dữ liệu bị gửi lại nhiều lần; hệ thống dùng lại thông tin cũ thay vì tạo thông điệp mới.',
+    nonce_reuse: 'Đặc điểm: một giá trị chỉ dùng một lần như nonce hoặc IV bị tái sử dụng, làm mất tính ngẫu nhiên và cho phép kẻ tấn công so sánh các bản mã.',
+    unsalted_hash: 'Đặc điểm: hàm băm được tính mà không có salt, khiến cùng dữ liệu luôn cho cùng một hash và dễ bị dò tìm qua bảng tra cứu.'
+  };
+  return hints[vulnType] || 'Nhập tên lỗ hổng phù hợp với nội dung câu hỏi.';
 }
 
 // Tạo và hiển thị màn hình câu hỏi đặc biệt cho map 4.
@@ -1149,19 +1373,50 @@ function cancelDecodeScreen() {
 
 // Xác nhận câu trả lời của người chơi và cộng điểm nếu đáp án đúng.
 function submitDecode() {
-  let input = document.getElementById('decode-input').value.toLowerCase();
+  let input = document.getElementById('decode-input').value.toLowerCase().trim();
   let cipherType = document.getElementById('cipher-type').value;
   let feedback = document.createElement('div');
   feedback.id = 'feedback';
   document.body.appendChild(feedback);
   feedback.style.display = 'none';
 
-  if (cipherType === currentPuzzle.cipher_type && input === currentPuzzle.treasure.toLowerCase()) {
+  const normalizedTreasure = (currentPuzzle.treasure || '').toString().toLowerCase().trim();
+
+  // Vulnerability detection
+  if (cipherType === 'vuln' || currentPuzzle.cipher_type === 'vuln') {
+    const answers = (currentPuzzle.vuln_answers || []).map(a => a.toLowerCase());
+    if (answers.includes(input)) {
+      feedback.innerText = "Phát hiện lỗi bảo mật đúng!";
+      const puzzlePoints = puzzlePointsByLevel[level - 1] || 0;
+      score += puzzlePoints;
+      levelScore += puzzlePoints;
+      updateUI();
+      showPuzzleExplanation(currentPuzzle, input);
+      if (currentPuzzle.gem) gems = gems.filter(item => item !== currentPuzzle.gem);
+      pendingPuzzles = pendingPuzzles.filter(entry => entry.puzzle !== currentPuzzle);
+      currentPuzzle.pending = false;
+      currentPuzzle.gem = null;
+      currentPuzzle = {};
+      puzzleRestorePosition = null;
+      hideDecodeScreen();
+      mummyPauseSteps = 2;
+      saveProgress();
+    } else {
+      feedback.innerText = "Chưa đúng. Hãy thử lại.";
+      moveMummy();
+    }
+    feedback.style.display = 'block';
+    setTimeout(() => feedback.style.display = 'none', 2000);
+    return;
+  }
+
+  if (cipherType === currentPuzzle.cipher_type && input === normalizedTreasure) {
     feedback.innerText = "Thông điệp đã được giải mã thành công! Tiếp tục.";
     const puzzlePoints = puzzlePointsByLevel[level - 1] || 0;
     score += puzzlePoints;
     levelScore += puzzlePoints;
     updateUI();
+    showPuzzleExplanation(currentPuzzle, input);
     if (currentPuzzle.gem) {
       gems = gems.filter(item => item !== currentPuzzle.gem);
     }
@@ -1172,12 +1427,132 @@ function submitDecode() {
     puzzleRestorePosition = null;
     hideDecodeScreen();
     mummyPauseSteps = 2; // Xác ướp đứng im 2 bước của người chơi sau khi giải xong
+    saveProgress();
   } else {
     feedback.innerText = "Giải mã thất bại. Xác ướp đã đến gần bạn hơn.";
     moveMummy();
   }
   feedback.style.display = 'block';
   setTimeout(() => feedback.style.display = 'none', 2000);
+}
+
+// Save/load progress
+function serializePuzzle(puzzle) {
+  if (!puzzle) return null;
+  return {
+    question: puzzle.question,
+    treasure: puzzle.treasure,
+    cipher_type: puzzle.cipher_type,
+    note: puzzle.note,
+    vuln_answers: puzzle.vuln_answers,
+    vuln_type: puzzle.vuln_type,
+    pending: puzzle.pending,
+    gem: puzzle.gem ? { x: puzzle.gem.x, y: puzzle.gem.y } : null
+  };
+}
+
+function saveProgress() {
+  try {
+    const elapsedTime = startTime > 0 ? Date.now() - startTime : 0;
+    const data = {
+      level,
+      score,
+      levelScore,
+      player: {
+        gridX: player.gridX,
+        gridY: player.gridY,
+        prevGridX: player.prevGridX,
+        prevGridY: player.prevGridY,
+        x: player.x,
+        y: player.y
+      },
+      mummy: {
+        gridX: mummy.gridX,
+        gridY: mummy.gridY,
+        x: mummy.x,
+        y: mummy.y
+      },
+      mummyPauseSteps,
+      elapsedTime,
+      gems: gems.map(g => ({ x: g.x, y: g.y })),
+      currentPuzzles: currentPuzzles.map(serializePuzzle),
+      pendingPuzzles: pendingPuzzles.map(entry => ({
+        puzzle: serializePuzzle(entry.puzzle),
+        gem: { x: entry.gem.x, y: entry.gem.y },
+        restorePosition: entry.restorePosition
+      })),
+      currentPuzzle: serializePuzzle(currentPuzzle),
+      updated: Date.now()
+    };
+    localStorage.setItem('gameProgress', JSON.stringify(data));
+  } catch (e) {
+    console.warn('Không thể lưu tiến độ', e);
+  }
+}
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem('gameProgress');
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+function clearProgress() {
+  try {
+    localStorage.removeItem('gameProgress');
+  } catch (e) {
+    console.warn('Không thể xóa tiến độ', e);
+  }
+}
+
+function applySavedProgress(saved) {
+  if (!saved) return;
+  level = saved.level || initialLevel;
+  score = saved.score || 0;
+  levelScore = saved.levelScore || 0;
+  startTime = Date.now() - (saved.elapsedTime || 0);
+  const homeScreen = document.getElementById('home-screen');
+  const gameContainer = document.getElementById('game-container');
+  const infoContainer = document.getElementById('info-container');
+  if (homeScreen) homeScreen.style.display = 'none';
+  if (gameContainer) gameContainer.style.display = 'flex';
+  if (infoContainer) infoContainer.style.display = 'flex';
+
+  initMap(level, () => {
+    player.gridX = saved.player.gridX;
+    player.gridY = saved.player.gridY;
+    player.prevGridX = saved.player.prevGridX;
+    player.prevGridY = saved.player.prevGridY;
+    player.x = saved.player.x;
+    player.y = saved.player.y;
+
+    mummy.gridX = saved.mummy.gridX;
+    mummy.gridY = saved.mummy.gridY;
+    mummy.x = saved.mummy.x;
+    mummy.y = saved.mummy.y;
+    mummyPauseSteps = typeof saved.mummyPauseSteps === 'number' ? saved.mummyPauseSteps : 0;
+
+    if (saved.gems && Array.isArray(saved.gems)) {
+      gems = saved.gems.map(g => ({ x: g.x, y: g.y }));
+    }
+
+    currentPuzzles = Array.isArray(saved.currentPuzzles) ? saved.currentPuzzles.map(p => ({ ...p })) : [];
+    pendingPuzzles = Array.isArray(saved.pendingPuzzles) ? saved.pendingPuzzles.map(entry => ({
+      puzzle: { ...entry.puzzle },
+      gem: { ...entry.gem },
+      restorePosition: entry.restorePosition
+    })) : [];
+    currentPuzzle = saved.currentPuzzle ? { ...saved.currentPuzzle } : {};
+    updateUI();
+  });
+}
+
+function resumeSavedProgress(saved) {
+  savedProgressToResume = null;
+  applySavedProgress(saved);
 }
 
 // Mã hóa chuỗi bằng Caesar Cipher để tạo câu đố cho người chơi giải.
@@ -1188,6 +1563,40 @@ function caesarEncode(text, shift) {
     }
     return char;
   }).join('');
+}
+
+function vigenereEncode(text, key) {
+  text = text.toLowerCase();
+  key = key.toLowerCase();
+  let out = '';
+  let ki = 0;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c >= 'a' && c <= 'z') {
+      const k = key[ki % key.length].charCodeAt(0) - 97;
+      out += String.fromCharCode((c.charCodeAt(0) - 97 + k) % 26 + 97);
+      ki++;
+    } else {
+      out += c;
+    }
+  }
+  return out;
+}
+
+async function sha256Hex(message) {
+  if (window.crypto && crypto.subtle && typeof crypto.subtle.digest === 'function') {
+    const enc = new TextEncoder();
+    const buf = await crypto.subtle.digest('SHA-256', enc.encode(message));
+    const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    return hex;
+  }
+  // Fallback: simple non-cryptographic hash (for offline/dev)
+  let hash = 0;
+  for (let i = 0; i < message.length; i++) {
+    hash = ((hash << 5) - hash) + message.charCodeAt(i);
+    hash |= 0;
+  }
+  return (hash >>> 0).toString(16);
 }
 
 function rsaEncode(text) {
@@ -1202,11 +1611,23 @@ function rsaEncode(text) {
   }).join(' ');
 }
 
-function aesEncode(text) {
-  try {
+function aesEncode(text, key) {
+  if (!key) {
     return btoa(text.toLowerCase());
+  }
+
+  const normalized = text.toLowerCase();
+  let transformed = '';
+  for (let i = 0; i < normalized.length; i++) {
+    const charCode = normalized.charCodeAt(i);
+    const keyCode = key.charCodeAt(i % key.length);
+    transformed += String.fromCharCode(charCode ^ keyCode);
+  }
+
+  try {
+    return btoa(transformed);
   } catch (error) {
-    return text.toLowerCase().split('').map(char => char.charCodeAt(0).toString(16)).join('');
+    return transformed.split('').map(char => char.charCodeAt(0).toString(16)).join('');
   }
 }
 
@@ -1239,6 +1660,22 @@ function resetGameState() {
   specialQuestionActive = false;
   burnEffect.active = false;
   headFallEffect.active = false;
+  // Đặt vị trí player và mummy ngay lập tức nếu ta đã biết vị trí bắt đầu của map
+  if (startPositions[level]) {
+    player.gridX = startPositions[level].x;
+    player.gridY = startPositions[level].y;
+    player.prevGridX = player.gridX;
+    player.prevGridY = player.gridY;
+    player.x = player.gridX * tileSize + tileSize / 2;
+    player.y = player.gridY * tileSize + tileSize / 2;
+    // Đặt mummy ra xa người chơi tạm thời để tránh va chạm ngay khi restart
+    const cols = (grid && grid[0]) ? grid[0].length : 12;
+    const safeMummyX = Math.min(cols - 1, player.gridX + 3);
+    mummy.gridX = safeMummyX;
+    mummy.gridY = player.gridY;
+    mummy.x = mummy.gridX * tileSize + tileSize / 2;
+    mummy.y = mummy.gridY * tileSize + tileSize / 2;
+  }
   const lostScreen = document.getElementById('lost-screen');
   if (lostScreen) {
     lostScreen.style.display = 'none';
@@ -1265,7 +1702,7 @@ function resetGameState() {
   }
   const infoContainer = document.getElementById('info-container');
   if (infoContainer) {
-    infoContainer.style.display = 'none';
+    infoContainer.style.display = 'flex';
   }
   if (lostScreenTimeout) {
     clearTimeout(lostScreenTimeout);
@@ -1280,6 +1717,8 @@ function restartGame() {
     ingameSong.currentTime = 0;
     ingameSong.play().catch(() => {});
   }
+  // Quay về map khởi đầu khi chơi lại
+  level = initialLevel;
   resetGameState();
 }
 
@@ -1299,6 +1738,7 @@ function showCompleteScreen() {
 
 // Hiển thị màn hình thua và báo lại thời gian cũng như điểm số đạt được.
 function showLostScreen() {
+  clearProgress();
   let lostScreen = document.getElementById('lost-screen');
   
   // Tạo element nếu chưa tồn tại
