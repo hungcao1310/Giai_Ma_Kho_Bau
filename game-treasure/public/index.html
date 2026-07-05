@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giải mã kho báu</title>
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      display: flex;
+      min-height: 100vh;
+      min-width: 100vw;
+    }
+    #game-info {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 5;
+      background: rgba(0, 0, 0, 0.75);
+      color: #f0f0f0;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      max-width: 420px;
+    }
+    #game-info p {
+        white-space: nowrap; 
+        font-size: 16px; 
+        color: #f0f0f0; 
+        margin: 0;
+        }
+    #complete-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+    #complete-screen.show {
+      display: flex;
+    }
+    #complete-content {
+      background: white;
+      padding: 40px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    #complete-content h2 {
+      font-size: 2em;
+      color: #667eea;
+      margin-bottom: 20px;
+    }
+    #complete-content p {
+      font-size: 1.2em;
+      margin: 15px 0;
+      color: #333;
+    }
+    #complete-content button {
+      margin-top: 20px;
+      padding: 12px 30px;
+      font-size: 1em;
+      background-color: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #complete-content button:hover {
+      background-color: #5568d3;
+    }
+    #name-input-screen {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      z-index: 2000;
+      display: none;
+    }
+    #name-input-screen.show {
+      display: block;
+    }
+    #name-input-screen h3 {
+      margin-top: 0;
+    }
+    #player-name-input {
+      padding: 8px;
+      font-size: 1em;
+      width: 200px;
+      margin: 10px 0;
+    }
+    #name-input-screen button {
+      margin: 0 5px;
+      padding: 8px 20px;
+      font-size: 1em;
+      background-color: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #name-input-screen button:hover {
+      background-color: #5568d3;
+    }
+    #leaderboard {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 600px;
+      color: #333;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 0 30px rgba(0,0,0,0.5);
+      z-index: 2000;
+    }
+    #leaderboard.show {
+      display: block;
+    }
+    #leaderboard h3 {
+      margin-top: 0;
+      color: #667eea;
+      text-align: center;
+    }
+    #leaderboard table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    #leaderboard th {
+      background-color: #667eea;
+      color: white;
+      padding: 10px;
+      text-align: left;
+    }
+    #leaderboard td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    #leaderboard tr:hover {
+      background-color: #f0f0f0;
+    }
+    #close-leaderboard-btn {
+      display: block;
+      margin: 15px auto 0;
+      padding: 8px 20px;
+      background-color: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #close-leaderboard-btn:hover {
+      background-color: #5568d3;
+    }
+    #leaderboard-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1999;
+    }
+    #leaderboard-overlay.show {
+      display: block;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 40px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    #leaderboard-btn {
+      padding: 15px 30px;
+      font-size: 1.1em;
+      background-color: #4ecdc4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #leaderboard-btn:hover {
+      background-color: #45b5ad;
+    }
+    #game-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    #info-container {
+      width: 320px;
+      background-color: #fff;
+      padding: 20px;
+      border-left: 2px solid #ccc;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    #explanation-panel {
+      background: linear-gradient(135deg, #fff7d6, #ffeaa7);
+      border: 1px solid #e2c66d;
+      border-radius: 10px;
+      padding: 14px 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    #explanation-panel h3 {
+      margin: 0 0 8px 0;
+      color: #7a4b00;
+      text-align: left;
+      font-size: 1.02em;
+    }
+    #explanation-text {
+      margin: 0;
+      color: #5a3b00;
+      line-height: 1.7;
+      font-size: 0.95em;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      display: flex;
+      min-height: 100vh;
+      min-width: 100vw;
+      flex-wrap: nowrap;
+      overflow: hidden;
+    }
+    #game-container {
+      display: none;
+      position: relative;
+      flex: 1 1 auto;
+      min-width: 0;
+      height: 100vh;
+      max-width: calc(100vw - 320px);
+      background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('../data/picture/sand.jpg');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      overflow: hidden;
+    }
+    #info-container {
+      flex: 0 0 320px;
+      width: 320px;
+      max-height: 100vh;
+      overflow-y: auto;
+      background-color: #fff;
+      padding: 20px;
+      border-left: 2px solid #ccc;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+    }
+    #game-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 2px solid #333;
+      box-sizing: border-box;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1;
+    }
+    #game-canvas canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+    }
+    #game-container h1 {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2001;
+      margin: 0;
+    }
+    #save-progress-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 2002;
+      padding: 10px 16px;
+      background-color: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95em;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+    #save-progress-btn:hover {
+      background-color: #ff5252;
+    }
+    #decode-screen {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border: 2px solid #333;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    #feedback {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    h1, h3 {
+      text-align: center;
+    }
+    #info-container h2 {
+      margin-top: 0;
+    }
+    #info-container p {
+      line-height: 1.6;
+    }
+    #home-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('../data/picture/background.jpg');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    #home-screen h1 {
+      font-size: 3em;
+      color: white;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    #home-screen p {
+      font-size: 1.2em;
+      color: white;
+      text-align: center;
+      max-width: 600px;
+      margin-bottom: 40px;
+    }
+    #start-btn, #intro-btn {
+      padding: 15px 50px;
+      font-size: 1.2em;
+      background-color: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #start-btn:hover, #intro-btn:hover {
+      background-color: #ff5252;
+    }
+    #intro-screen {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(90%, 700px);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.98);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.4);
+      z-index: 2001;
+    }
+    #intro-screen.show {
+      display: block;
+    }
+    #intro-screen h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    #intro-screen p, #intro-screen li {
+      line-height: 1.6;
+      color: #333;
+    }
+    #intro-screen ul {
+      padding-left: 20px;
+    }
+    #close-intro-btn {
+      margin-top: 20px;
+      padding: 12px 25px;
+      font-size: 1em;
+      background-color: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #close-intro-btn:hover {
+      background-color: #5568d3;
+    }
+    #game-container {
+      display: none;
+      width: 100%;
+      min-height: 100vh;
+      background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('../data/picture/sand.jpg');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    #game-container h1 {
+      color: #ffffff;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+      margin: 12px 0 8px 0;
+      text-align: center;
+      font-size: 2em;
+    }
+    #save-progress-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 2002;
+      padding: 10px 16px;
+      background-color: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95em;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+    #save-progress-btn:hover {
+      background-color: #ff5252;
+    }
+  </style>
+</head>
+<body>
+  <div id="home-screen">
+    <h1>🏴‍☠️ Giải mã kho báu</h1>
+    <p>Một trò chơi phiêu lưu kết hợp giải đố về mã hóa thông tin. <br> Hãy thu thập gems, giải quyết câu đố và tìm kiếm kho báu!</p>
+    <div class="button-group">
+      <button id="start-btn">Bắt đầu trò chơi</button>
+      <button id="intro-btn">📘 Giới thiệu</button>
+      <button id="leaderboard-btn">🏆 Bảng xếp hạng</button>
+    </div>
+  </div>
+  <audio id="theme-song" src="../data/song/theme_song.mp3" loop preload="auto"></audio>
+  <audio id="ingame-song" src="../data/song/ingame_song.mp3" loop preload="auto"></audio>
+  <audio id="footsteps-sound" src="../data/song/footsteps.mp3" preload="auto"></audio>
+  <audio id="teleport-sound" src="../data/song/teleport.mp3" preload="auto"></audio>
+  <audio id="lava-burn-sound" src="../data/âm thanh/lava.mp3" preload="auto"></audio>
+  <audio id="mummy-bite-sound" src="../data/âm thanh/xác ướp.mp3" preload="auto"></audio>
+  <div id="intro-screen">
+    <h2>Giới thiệu trò chơi</h2>
+    <p>"Giải mã kho báu" là một trò chơi phiêu lưu kết hợp giải đố. Người chơi điều khiển nhân vật thu thập các viên ngọc (gem) để nhận câu đố mã hóa. Mỗi câu đố yêu cầu bạn chọn đúng thuật toán (Caesar, Vigenère, RSA, hoặc AES) và giải mã thông điệp để ghi điểm.</p>
+    <h3>Cách chơi:</h3>
+    <ul>
+      <li>Sử dụng các phím mũi tên để di chuyển nhân vật.</li>
+      <li>Thu thập gem để nhận câu đố.</li>
+      <li>Giải mã câu đố bằng cách nhập đáp án đúng.</li>
+      <li>Đạt đủ điểm để mở cửa và tiến đến cấp độ tiếp theo.</li>
+      <li>Tránh kẻ thù và lava để không bị thua!</li>
+    </ul>
+    <h3>Tính điểm:</h3>
+    <p>Mỗi câu đố giải đúng được 10 điểm. Điểm yêu cầu để qua từng cấp độ:</p>
+    <ul>
+      <li>Cấp 1: 10 điểm</li>
+      <li>Cấp 2: 20 điểm</li>
+      <li>Cấp 3: 30 điểm</li>
+      <li>Cấp 4: 50 điểm</li>
+    </ul>
+    <h3>Thời gian:</h3>
+    <p>Thời gian được tính từ khi bắt đầu mỗi cấp độ. Hoàn thành cấp độ nhanh để thử thách bản thân!</p>
+    <button id="close-intro-btn">Đóng</button>
+  </div>
+  <div id="leaderboard-overlay"></div>
+  <div id="leaderboard">
+    <h3>🏆 Bảng xếp hạng cao nhất</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Người chơi</th>
+          <th>Điểm</th>
+          <th>Thời gian</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-body">
+      </tbody>
+    </table>
+    <button id="close-leaderboard-btn">Đóng</button>
+  </div>
+  <div id="name-input-screen">
+    <h2 style="color: #667eea; margin-top: 0;">🎉 Chúc mừng!</h2>
+    <p style="font-size: 1.1em; margin: 15px 0;">Bạn đã hoàn thành trò chơi!</p>
+    <p id="completion-stats" style="font-size: 1em; color: #666;"></p>
+    <p style="font-size: 1em; margin-top: 20px;">Vui lòng nhập tên của bạn</p>
+    <input type="text" id="player-name-input" placeholder="Nhập tên của bạn">
+    <br>
+    <button id="save-name-btn">Lưu</button>
+    <button id="skip-name-btn">Bỏ qua</button>
+  </div>
+  <div id="complete-screen">
+    <div id="complete-content">
+      <h2>🎉 Chúc mừng!</h2>
+      <p>Bạn đã hoàn thành trò chơi!</p>
+      <p id="complete-time">Thời gian: 00:00</p>
+      <p id="complete-score">Tổng điểm: 0</p>
+      <button id="home-btn">Về trang chủ</button>
+    </div>
+  </div>
+  <div id="game-container">
+    <h1>Giải mã kho báu</h1>
+    <button id="save-progress-btn" type="button">Lưu tiến trình</button>
+    <div id="game-canvas" style="position: relative;"></div>
+    <div id="game-info">
+      <p>
+        Cấp độ: <span id="level">1</span> |
+        Điểm: <span id="score">0</span> |
+        Thời gian: <span id="timer">00:00</span> |
+        Câu đố: <span id="current-puzzle">Thu thập gem để nhận câu đố</span>
+      </p>
+    </div>
+  </div>
+  <div id="info-container">
+    <div id="explanation-panel">
+      <h3>Giải thích câu trả lời</h3>
+      <p id="explanation-text">Giải thích sẽ xuất hiện ở đây sau khi bạn hoàn thành một câu đố đúng.</p>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

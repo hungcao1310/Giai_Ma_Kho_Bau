@@ -1,0 +1,33 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: #1a1a1a;
+}
+#ui {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: white;
+  font-family: Arial;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 5px;
+}
+#game-canvas {
+  position: relative;
+}
+#decode-screen {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.7);
+  padding: 20px;
+  color: white;
+  border-radius: 5px;
+  display: none;
+}
+#decode-screen select, #decode-screen input, #decode-screen button {
+  display: block;
+  margin: 10px 0;
+}
