@@ -1192,6 +1192,8 @@ function showPuzzleExplanation(puzzle, answer) {
   } else if (cipherType === 'vuln') {
     const answers = (puzzle.vuln_answers || []).map(item => item.toString()).join(', ');
     explanation = `Đây là câu đố phát hiện lỗ hổng bảo mật và cách hiểu cần được trình bày từng bước. Bước 1: đọc kỹ mô tả để xác định hành vi bất thường hoặc mô tả về dữ liệu. Bước 2: chọn loại lỗ hổng phù hợp với hành vi đó, ví dụ replay attack, nonce reuse hoặc hash không có salt. Bước 3: đối chiếu với các cách khai thác tương ứng và chọn tên lỗ hổng chính xác. Đáp án đúng là <strong>${answers}</strong>.`;
+  } else if (cipherType === 'theory') {
+    explanation = `Đây là câu hỏi lý thuyết về mật mã học. Câu trả lời đúng là <strong>${treasure}</strong>. Hãy ôn lại kiến thức về các thuật toán mã hóa (AES, RSA) cũng như các khái niệm bảo mật thông tin cơ bản để hiểu rõ hơn về đáp án này.`;
   }
 
   lastPuzzleExplanation = explanation;
@@ -1217,6 +1219,7 @@ decodeScreen.innerHTML = `
     <option value="aes">AES</option>
     <option value="hash">Hash / Integrity</option>
     <option value="vuln">Vulnerability Detection</option>
+    <option value="theory">Lý thuyết</option>
   </select>
   <input type="text" id="decode-input" placeholder="Nhập chuỗi giải mã">
   <button onclick="submitDecode()">Xác nhận</button>
@@ -1253,6 +1256,8 @@ function showDecodeScreen() {
       currentPuzzle.msg = `${msgToShow} | SHA256: ${hex}`;
     } else if (cipherType === 'vuln') {
       currentPuzzle.msg = currentPuzzle.note || getVulnHint(currentPuzzle.vuln_type);
+    } else if (cipherType === 'theory') {
+      currentPuzzle.msg = "Đây là câu hỏi lý thuyết. Hãy nhập câu trả lời của bạn vào ô bên dưới.";
     } else {
       currentPuzzle.msg = "[Không xác định cipher]";
     }

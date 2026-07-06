@@ -374,154 +374,154 @@
       "level": 3,
       "puzzles": [
         {
-          "question": "Khóa bí mật của hòm kho báu đang được giấu ở đâu trong đền thờ cũ? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "goldkey",
-          "cipher_type": "aes"
+          "question": "AES là viết tắt của từ gì? (Câu hỏi lý thuyết về AES)",
+          "treasure": "advanced encryption standard",
+          "cipher_type": "theory"
         },
         {
-          "question": "Vị trí chính xác của kho báu nằm sâu trong dãy núi nào đó? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "mountain",
-          "cipher_type": "aes"
+          "question": "AES còn có tên gọi khác là gì? (Câu hỏi lý thuyết về AES)",
+          "treasure": "rijndael",
+          "cipher_type": "theory"
         },
         {
-          "question": "Mật mã cuối cùng được khắc lên viên kim cương nào? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "diamond",
-          "cipher_type": "aes"
+          "question": "Kích thước khối (block size) của AES là bao nhiêu bit? (Câu hỏi lý thuyết về AES)",
+          "treasure": "128",
+          "cipher_type": "theory"
         },
         {
-          "question": "Mảnh bản đồ thứ hai kể cho ngươi nghe điều gì trong lời nguyền của người xưa? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "cipher",
-          "cipher_type": "aes"
+          "question": "AES hỗ trợ những kích thước khóa nào? (Câu hỏi lý thuyết về AES)",
+          "treasure": "128 192 256",
+          "cipher_type": "theory"
         },
         {
-          "question": "Bên trong phòng trưng bày, lời mã hóa còn chừa lại điều gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "secret",
-          "cipher_type": "aes"
+          "question": "AES-128 sử dụng bao nhiêu vòng (round) mã hóa? (Câu hỏi lý thuyết về AES)",
+          "treasure": "10",
+          "cipher_type": "theory"
         },
         {
-          "question": "Người giữ lăng mộ để lại một từ mã hóa nào cho ngươi? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "glyph",
-          "cipher_type": "aes"
+          "question": "AES-192 sử dụng bao nhiêu vòng (round) mã hóa? (Câu hỏi lý thuyết về AES)",
+          "treasure": "12",
+          "cipher_type": "theory"
         },
         {
-          "question": "Một cửa sắt cũ đang giữ gì trong lòng mình? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "iron",
-          "cipher_type": "aes"
+          "question": "AES-256 sử dụng bao nhiêu vòng (round) mã hóa? (Câu hỏi lý thuyết về AES)",
+          "treasure": "14",
+          "cipher_type": "theory"
         },
         {
-          "question": "Bức tranh trên tường giấu đi manh mối gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "painting",
-          "cipher_type": "aes"
+          "question": "AES là thuật toán mã hóa đối xứng hay bất đối xứng? (Câu hỏi lý thuyết về AES)",
+          "treasure": "đối xứng",
+          "cipher_type": "theory"
         },
         {
-          "question": "Mảnh gỗ đen trong đền có mang theo lời nhắn nào? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "oakwood",
-          "cipher_type": "aes"
+          "question": "AES thuộc loại mã hóa khối (block cipher) hay dòng (stream cipher)? (Câu hỏi lý thuyết về AES)",
+          "treasure": "khối",
+          "cipher_type": "theory"
         },
         {
-          "question": "Đường hầm sâu thứ nhất dẫn ngươi tới đâu? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "tunnel",
-          "cipher_type": "aes"
+          "question": "AES sử dụng cấu trúc mạng gì? (Feistel hay SPN?) (Câu hỏi lý thuyết về AES)",
+          "treasure": "spn",
+          "cipher_type": "theory"
         },
         {
-          "question": "Một bình đồng cũ chứa điều gì bên trong? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "bronze",
-          "cipher_type": "aes"
+          "question": "Trong một vòng AES, bước nào thay thế các byte dựa trên bảng S-box? (Câu hỏi lý thuyết về AES)",
+          "treasure": "subbytes",
+          "cipher_type": "theory"
         },
         {
-          "question": "Vách đá bên trong đền có khắc một chữ gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "inscription",
-          "cipher_type": "aes"
+          "question": "Trong một vòng AES, bước nào dịch chuyển các hàng của ma trận trạng thái? (Câu hỏi lý thuyết về AES)",
+          "treasure": "shiftrows",
+          "cipher_type": "theory"
         },
         {
-          "question": "Chiếc đèn dầu trong phòng kín vẫn còn cháy không? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "lantern",
-          "cipher_type": "aes"
+          "question": "Trong một vòng AES, bước nào trộn các cột của ma trận trạng thái? (Câu hỏi lý thuyết về AES)",
+          "treasure": "mixcolumns",
+          "cipher_type": "theory"
         },
         {
-          "question": "Bức tượng người đứng giữa sân có gì đặc biệt? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "statue",
-          "cipher_type": "aes"
+          "question": "Trong một vòng AES, bước nào thực hiện phép XOR với khóa con? (Câu hỏi lý thuyết về AES)",
+          "treasure": "addroundkey",
+          "cipher_type": "theory"
         },
         {
-          "question": "Một hạt ngọc rơi giữa đất sỏi cho thấy điều gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "pearl",
-          "cipher_type": "aes"
+          "question": "AES được NIST công bố để thay thế cho thuật toán mã hóa nào trước đây? (Câu hỏi lý thuyết về AES)",
+          "treasure": "des",
+          "cipher_type": "theory"
         },
         {
-          "question": "Mảnh đồng xu cũ mang theo lời hứa gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "coin",
-          "cipher_type": "aes"
+          "question": "AES hoạt động trên ma trận trạng thái (state) kích thước bao nhiêu byte? (Câu hỏi lý thuyết về AES)",
+          "treasure": "16",
+          "cipher_type": "theory"
         },
         {
-          "question": "Một vòng dây bằng vàng có ghi một từ gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "bracelet",
-          "cipher_type": "aes"
+          "question": "AES có sử dụng khóa công khai (public key) để mã hóa không? (Câu hỏi lý thuyết về AES)",
+          "treasure": "không",
+          "cipher_type": "theory"
         },
         {
-          "question": "Ánh sáng từ khe cửa dẫn ngươi tới đâu? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "glow",
-          "cipher_type": "aes"
+          "question": "Trong AES, quá trình mở rộng khóa (key expansion) dùng để tạo ra gì? (Câu hỏi lý thuyết về AES)",
+          "treasure": "khóa con",
+          "cipher_type": "theory"
         },
         {
-          "question": "Đá hoa cương nơi bàn thờ đang ẩn giấu thứ gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "crystal",
-          "cipher_type": "aes"
+          "question": "Kích thước khóa AES nào được coi là an toàn nhất trong các lựa chọn? (Câu hỏi lý thuyết về AES)",
+          "treasure": "256",
+          "cipher_type": "theory"
         },
         {
-          "question": "Chiếc hộp gỗ bên lối vào có gì bên trong? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "box",
-          "cipher_type": "aes"
+          "question": "AES có hỗ trợ các chế độ mã hóa như ECB, CBC, CFB không? (Câu hỏi lý thuyết về AES)",
+          "treasure": "có",
+          "cipher_type": "theory"
         },
         {
-          "question": "Lời thề của người xưa được khắc lên vật gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "tablet",
-          "cipher_type": "aes"
+          "question": "Chế độ ECB trong AES có được đánh giá là an toàn không? (Câu hỏi lý thuyết về AES)",
+          "treasure": "không",
+          "cipher_type": "theory"
         },
         {
-          "question": "Một hạt bụi bạc lấp lánh trên nền đất báo hiệu điều gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "silver",
-          "cipher_type": "aes"
+          "question": "AES có thể được thực thi hiệu quả trên cả phần mềm lẫn phần cứng không? (Câu hỏi lý thuyết về AES)",
+          "treasure": "có",
+          "cipher_type": "theory"
         },
         {
-          "question": "Bậc thềm đá cuối cùng dẫn tới đâu? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "stairs",
-          "cipher_type": "aes"
+          "question": "AES có nguồn gốc từ hai nhà mật mã học người Bỉ, đúng hay sai? (Câu hỏi lý thuyết về AES)",
+          "treasure": "đúng",
+          "cipher_type": "theory"
         },
         {
-          "question": "Cây quạt đá đứng giữa sân có gì đáng chú ý? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "fan",
-          "cipher_type": "aes"
+          "question": "AES được NIST chính thức công bố vào năm nào? (Câu hỏi lý thuyết về AES)",
+          "treasure": "2001",
+          "cipher_type": "theory"
         },
         {
-          "question": "Lời răn dạy cũ còn được lưu lại ở đâu? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "teachings",
-          "cipher_type": "aes"
+          "question": "AES có sử dụng phép toán XOR trong quá trình mã hóa không? (Câu hỏi lý thuyết về AES)",
+          "treasure": "có",
+          "cipher_type": "theory"
         },
         {
-          "question": "Một vòng tròn bằng đá chỉ về nơi nào? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "circle",
-          "cipher_type": "aes"
+          "question": "Một khối dữ liệu AES sau khi mã hóa có kích thước bao nhiêu byte? (Câu hỏi lý thuyết về AES)",
+          "treasure": "16",
+          "cipher_type": "theory"
         },
         {
-          "question": "Mảnh giấy da cũ có ghi một điều gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "parchment",
-          "cipher_type": "aes"
+          "question": "AES có thể bị tấn công bằng phương pháp vét cạn (brute-force) không? (Câu hỏi lý thuyết về AES)",
+          "treasure": "có",
+          "cipher_type": "theory"
         },
         {
-          "question": "Ngọn đèn lửa ở góc phòng đang báo hiệu điều gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "signal",
-          "cipher_type": "aes"
+          "question": "Trong AES, bước AddRoundKey thực hiện phép toán gì giữa trạng thái và khóa con? (Câu hỏi lý thuyết về AES)",
+          "treasure": "xor",
+          "cipher_type": "theory"
         },
         {
-          "question": "Một hốc đá nhỏ trong tường có giấu điều gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "niche",
-          "cipher_type": "aes"
+          "question": "AES có phải là thuật toán mã hóa bất đối xứng không? (Câu hỏi lý thuyết về AES)",
+          "treasure": "không",
+          "cipher_type": "theory"
         },
         {
-          "question": "Bước chân cuối cùng của người xưa dừng lại ở đâu? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "landing",
-          "cipher_type": "aes"
+          "question": "Số vòng (round) của AES-128 là bao nhiêu? (Câu hỏi lý thuyết về AES)",
+          "treasure": "10",
+          "cipher_type": "theory"
         }
       ]
     },
@@ -529,154 +529,154 @@
       "level": 4,
       "puzzles": [
         {
-          "question": "Kho báu cuối cùng đang giấu trong lòng ngọc gì của đền thờ? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "treasure",
-          "cipher_type": "rsa"
+          "question": "RSA là viết tắt của tên ba nhà khoa học nào? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "rivest shamir adleman",
+          "cipher_type": "theory"
         },
         {
-          "question": "Bí mật của chiếc rương cổ được ghi bằng thứ gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "ruby",
-          "cipher_type": "rsa"
+          "question": "RSA là thuật toán mã hóa đối xứng hay bất đối xứng? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "bất đối xứng",
+          "cipher_type": "theory"
         },
         {
-          "question": "Điểm đến cuối cùng của người hành trình là ngôi đền nào đó? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "temple",
-          "cipher_type": "rsa"
+          "question": "RSA dựa trên bài toán khó nào để đảm bảo an toàn? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "phân tích số nguyên tố",
+          "cipher_type": "theory"
         },
         {
-          "question": "Huyền thoại về kho báu kể rằng nó được bảo vệ bởi điều gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "legend",
-          "cipher_type": "rsa"
+          "question": "Trong RSA, khóa công khai (public key) gồm những thành phần nào? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "n e",
+          "cipher_type": "theory"
         },
         {
-          "question": "Một con đường bằng đá dẫn ngươi tới chiếc chìa khóa nào? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "keystone",
-          "cipher_type": "rsa"
+          "question": "Trong RSA, khóa bí mật (private key) gồm những thành phần nào? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "n d",
+          "cipher_type": "theory"
         },
         {
-          "question": "Lời nguyền cuối cùng được lưu trong vật gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "seal",
-          "cipher_type": "rsa"
+          "question": "Kích thước khóa RSA tối thiểu được khuyến nghị hiện nay là bao nhiêu bit? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "2048",
+          "cipher_type": "theory"
         },
         {
-          "question": "Trong phòng kín, thứ gì đang chờ ngươi mở ra? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "vault",
-          "cipher_type": "rsa"
+          "question": "Ngoài mã hóa, RSA còn được dùng để làm gì? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "ký số",
+          "cipher_type": "theory"
         },
         {
-          "question": "Dòng sáng trên trần nhà chỉ về nơi nào? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "ceiling",
-          "cipher_type": "rsa"
+          "question": "Hàm Euler φ(n) trong RSA được tính bằng công thức nào? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "(p-1)(q-1)",
+          "cipher_type": "theory"
         },
         {
-          "question": "Đống cát trong phòng thờ giấu điều gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "sand",
-          "cipher_type": "rsa"
+          "question": "Trong RSA, giá trị n được tính bằng tích của hai số gì? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "p q",
+          "cipher_type": "theory"
         },
         {
-          "question": "Một chiếc vòng đồng cũ có mang theo lời nhắn gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "ring",
-          "cipher_type": "rsa"
+          "question": "RSA có tốc độ mã hóa nhanh hơn AES không? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "không",
+          "cipher_type": "theory"
         },
         {
-          "question": "Tấm gỗ đen trong sân có chứa thứ gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "plank",
-          "cipher_type": "rsa"
+          "question": "Trong thực tế, RSA thường được dùng để mã hóa loại dữ liệu gì? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "khóa phiên",
+          "cipher_type": "theory"
         },
         {
-          "question": "Mảnh đá lăn trên nền gạch báo hiệu điều gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "marker",
-          "cipher_type": "rsa"
+          "question": "Điểm yếu chính của RSA so với AES là gì? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "tốc độ chậm",
+          "cipher_type": "theory"
         },
         {
-          "question": "Một hố nước ngầm ẩn giấu vật gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "well",
-          "cipher_type": "rsa"
+          "question": "RSA có thể bị tấn công bằng phương pháp nào nếu khóa không đủ lớn? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "phân tích thừa số",
+          "cipher_type": "theory"
         },
         {
-          "question": "Chiếc hộp đồng trong đền có ký hiệu gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "bronzebox",
-          "cipher_type": "rsa"
+          "question": "Hai số nguyên tố p và q trong RSA có nên được chọn có giá trị gần nhau không? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "không",
+          "cipher_type": "theory"
         },
         {
-          "question": "Một bức phù điêu cũ kể về chuyện gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "relief",
-          "cipher_type": "rsa"
+          "question": "RSA có sử dụng cùng một khóa cho cả mã hóa và giải mã không? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "không",
+          "cipher_type": "theory"
         },
         {
-          "question": "Bậc thềm cuối cùng dẫn ngươi tới nơi nào? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "threshold",
-          "cipher_type": "rsa"
+          "question": "Giá trị e trong RSA thường được chọn là số nguyên tố nào? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "65537",
+          "cipher_type": "theory"
         },
         {
-          "question": "Chiếc ghế đá xưa có gì đặc biệt? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "seat",
-          "cipher_type": "rsa"
+          "question": "RSA có an toàn trước các cuộc tấn công bằng máy tính lượng tử không? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "không",
+          "cipher_type": "theory"
         },
         {
-          "question": "Lời thề mất tích được viết ở đâu? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "wall",
-          "cipher_type": "rsa"
+          "question": "RSA thường được ứng dụng trong giao thức bảo mật nào trên Internet? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "ssl tls",
+          "cipher_type": "theory"
         },
         {
-          "question": "Mảnh gương cũ vẫn còn phản chiếu điều gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "mirror",
-          "cipher_type": "rsa"
+          "question": "RSA chỉ có thể mã hóa dữ liệu có kích thước tối đa bằng bao nhiêu? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "độ dài khóa",
+          "cipher_type": "theory"
         },
         {
-          "question": "Một hạt đá quý nằm trong hốc tường là gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "gem",
-          "cipher_type": "rsa"
+          "question": "Quy trình tạo khóa RSA bắt đầu bằng việc chọn hai số gì? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "số nguyên tố",
+          "cipher_type": "theory"
         },
         {
-          "question": "Đỉnh tháp cao nhất giữ gì trong lòng? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "spire",
-          "cipher_type": "rsa"
+          "question": "Giá trị d trong RSA được tính bằng phép toán gì? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "nghịch đảo modulo",
+          "cipher_type": "theory"
         },
         {
-          "question": "Lối đi sau cột đá mang theo điều gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "pillar",
-          "cipher_type": "rsa"
+          "question": "RSA có thể chống lại tấn công man-in-the-middle nếu được triển khai đúng không? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "có",
+          "cipher_type": "theory"
         },
         {
-          "question": "Một chiếc khóa bạc cũ còn được giữ ở đâu? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "silverkey",
-          "cipher_type": "rsa"
+          "question": "Chữ ký số RSA dùng khóa nào để ký (sign)? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "khóa bí mật",
+          "cipher_type": "theory"
         },
         {
-          "question": "Nơi giấu đồ trang sức là đâu? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "jewelbox",
-          "cipher_type": "rsa"
+          "question": "Chữ ký số RSA dùng khóa nào để xác thực (verify)? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "khóa công khai",
+          "cipher_type": "theory"
         },
         {
-          "question": "Người giữ lời hứa cũ đã để lại thứ gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "token",
-          "cipher_type": "rsa"
+          "question": "RSA có cần phải trao đổi khóa trước khi truyền tin không? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "không",
+          "cipher_type": "theory"
         },
         {
-          "question": "Phòng đựng linh hồn có cất giữ thứ gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "soul",
-          "cipher_type": "rsa"
+          "question": "RSA thường được kết hợp với thuật toán nào để mã hóa dữ liệu có kích thước lớn? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "aes",
+          "cipher_type": "theory"
         },
         {
-          "question": "Bức tượng đầu rồng có mở ra điều gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "dragon",
-          "cipher_type": "rsa"
+          "question": "Thuật toán RSA được công bố lần đầu vào năm nào? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "1977",
+          "cipher_type": "theory"
         },
         {
-          "question": "Bóng đèn trong tháp có sáng lên vì điều gì? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "light",
-          "cipher_type": "rsa"
+          "question": "RSA có thể dùng để trao đổi khóa một cách an toàn không? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "có",
+          "cipher_type": "theory"
         },
         {
-          "question": "Một chiếc áo giáp cũ bắt đầu lộ diện ở đâu? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "armor",
-          "cipher_type": "rsa"
+          "question": "Nếu biết được hai số nguyên tố p và q, có thể tính được khóa bí mật RSA không? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "có",
+          "cipher_type": "theory"
         },
         {
-          "question": "Cuối cùng, ngươi kiếm được gì trong lòng đền? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "prize",
-          "cipher_type": "rsa"
+          "question": "RSA thuộc loại mã hóa khóa công khai (public-key cryptography), đúng hay sai? (Câu hỏi lý thuyết về RSA)",
+          "treasure": "đúng",
+          "cipher_type": "theory"
         }
       ]
     },
