@@ -1193,7 +1193,138 @@ function showPuzzleExplanation(puzzle, answer) {
     const answers = (puzzle.vuln_answers || []).map(item => item.toString()).join(', ');
     explanation = `Đây là câu đố phát hiện lỗ hổng bảo mật và cách hiểu cần được trình bày từng bước. Bước 1: đọc kỹ mô tả để xác định hành vi bất thường hoặc mô tả về dữ liệu. Bước 2: chọn loại lỗ hổng phù hợp với hành vi đó, ví dụ replay attack, nonce reuse hoặc hash không có salt. Bước 3: đối chiếu với các cách khai thác tương ứng và chọn tên lỗ hổng chính xác. Đáp án đúng là <strong>${answers}</strong>.`;
   } else if (cipherType === 'theory') {
-    explanation = `Đây là câu hỏi lý thuyết về mật mã học. Câu trả lời đúng là <strong>${treasure}</strong>. Hãy ôn lại kiến thức về các thuật toán mã hóa (AES, RSA) cũng như các khái niệm bảo mật thông tin cơ bản để hiểu rõ hơn về đáp án này.`;
+    const questionLower = (puzzle.question || '').toLowerCase();
+    if (questionLower.includes('aes')) {
+      explanation = `<strong>Giải thích:</strong> Câu hỏi này thuộc về kiến thức nền tảng về AES.<br><br>`;
+      if (questionLower.includes('viết tắt')) {
+        explanation += `AES là viết tắt của <strong>Advanced Encryption Standard</strong> (Chuẩn mã hóa tiên tiến). Đây là thuật toán mã hóa đối xứng được NIST (Viện Tiêu chuẩn và Công nghệ Quốc gia Hoa Kỳ) công bố vào năm 2001. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('tên gọi khác')) {
+        explanation += `AES còn được biết đến với tên gọi <strong>Rijndael</strong>, là tên của hai nhà mật mã học người Bỉ đã phát minh ra nó: Joan Daemen và Vincent Rijmen. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('kích thước khối') || questionLower.includes('block size')) {
+        explanation += `AES là mã hóa khối (block cipher) với kích thước khối cố định là <strong>128 bit</strong> (tương đương 16 byte). Dữ liệu được chia thành từng khối 128 bit để xử lý. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('kích thước khóa')) {
+        explanation += `AES hỗ trợ ba kích thước khóa khác nhau: <strong>128 bit</strong>, <strong>192 bit</strong> và <strong>256 bit</strong>. Kích thước khóa càng lớn thì độ an toàn càng cao nhưng tốc độ xử lý càng chậm. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('vòng') || questionLower.includes('round')) {
+        if (questionLower.includes('128')) {
+          explanation += `AES-128 sử dụng <strong>10 vòng (round)</strong> mã hóa. Mỗi vòng thực hiện các bước: SubBytes, ShiftRows, MixColumns và AddRoundKey. Đáp án đúng: <strong>${treasure}</strong>.`;
+        } else if (questionLower.includes('192')) {
+          explanation += `AES-192 sử dụng <strong>12 vòng (round)</strong> mã hóa. Số vòng nhiều hơn AES-128 giúp tăng độ an toàn. Đáp án đúng: <strong>${treasure}</strong>.`;
+        } else if (questionLower.includes('256')) {
+          explanation += `AES-256 sử dụng <strong>14 vòng (round)</strong> mã hóa. Đây là phiên bản an toàn nhất của AES với số vòng mã hóa nhiều nhất. Đáp án đúng: <strong>${treasure}</strong>.`;
+        } else {
+          explanation += `Số vòng (round) của AES phụ thuộc vào kích thước khóa: AES-128 dùng 10 vòng, AES-192 dùng 12 vòng, AES-256 dùng 14 vòng. Đáp án đúng: <strong>${treasure}</strong>.`;
+        }
+      } else if (questionLower.includes('đối xứng') || questionLower.includes('bất đối xứng')) {
+        explanation += `AES là thuật toán mã hóa <strong>đối xứng</strong>, nghĩa là cùng một khóa được dùng cho cả mã hóa và giải mã. Điều này khác với RSA là mã hóa bất đối xứng. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('khối') || questionLower.includes('dòng') || questionLower.includes('block cipher') || questionLower.includes('stream cipher')) {
+        explanation += `AES thuộc loại mã hóa <strong>khối (block cipher)</strong>, xử lý dữ liệu theo từng khối 128 bit. Ngược lại, mã hóa dòng (stream cipher) xử lý từng bit hoặc byte một. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('cấu trúc') || questionLower.includes('mạng') || questionLower.includes('feistel') || questionLower.includes('spn')) {
+        explanation += `AES sử dụng cấu trúc mạng <strong>SPN (Substitution-Permutation Network)</strong>, khác với cấu trúc Feistel của DES. SPN giúp AES đạt được sự khuếch tán (diffusion) và gây nhầm lẫn (confusion) tốt hơn. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('subbytes')) {
+        explanation += `<strong>SubBytes</strong> là bước thay thế các byte trong ma trận trạng thái dựa trên bảng S-box (Substitution box). Mỗi byte được thay bằng một byte khác theo một bảng tra cứu cố định, tạo ra tính phi tuyến (non-linearity) cho thuật toán. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('shiftrows')) {
+        explanation += `<strong>ShiftRows</strong> là bước dịch chuyển các hàng của ma trận trạng thái. Hàng thứ nhất giữ nguyên, hàng thứ hai dịch trái 1 byte, hàng thứ ba dịch trái 2 byte, hàng thứ tư dịch trái 3 byte. Bước này tạo ra sự khuếch tán giữa các cột. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('mixcolumns')) {
+        explanation += `<strong>MixColumns</strong> là bước trộn các cột của ma trận trạng thái bằng cách nhân mỗi cột với một ma trận cố định trong trường GF(2⁸). Bước này kết hợp các byte trong cùng một cột để tăng tính khuếch tán. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('addroundkey')) {
+        explanation += `<strong>AddRoundKey</strong> là bước thực hiện phép XOR giữa ma trận trạng thái với khóa con (round key) tương ứng. Đây là bước duy nhất sử dụng khóa trong mỗi vòng AES. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('thay thế') || questionLower.includes('des')) {
+        explanation += `AES được NIST công bố năm 2001 để thay thế cho <strong>DES (Data Encryption Standard)</strong>, vốn đã trở nên không an toàn do kích thước khóa quá nhỏ (56 bit). Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('ma trận trạng thái') || questionLower.includes('state')) {
+        explanation += `AES hoạt động trên ma trận trạng thái (state) kích thước <strong>4×4 byte</strong> (tổng cộng 16 byte). Mỗi ô trong ma trận chứa 1 byte dữ liệu. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('công khai') || questionLower.includes('public key')) {
+        explanation += `AES là mã hóa đối xứng, do đó <strong>không</strong> sử dụng khóa công khai (public key). Khóa trong AES là khóa bí mật được chia sẻ giữa bên gửi và bên nhận. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('mở rộng khóa') || questionLower.includes('key expansion')) {
+        explanation += `Quá trình mở rộng khóa (key expansion) trong AES dùng để tạo ra các <strong>khóa con (round keys)</strong> từ khóa chính ban đầu. Mỗi vòng AES cần một khóa con riêng, và các khóa con này được tạo ra bằng thuật toán mở rộng khóa. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('an toàn nhất')) {
+        explanation += `Trong ba lựa chọn kích thước khóa của AES, <strong>AES-256</strong> (256 bit) được coi là an toàn nhất vì có không gian khóa lớn nhất (2²⁵⁶), khiến việc tấn công vét cạn (brute-force) trở nên bất khả thi với công nghệ hiện tại. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('ecb') || questionLower.includes('cbc') || questionLower.includes('cfb') || questionLower.includes('chế độ')) {
+        if (questionLower.includes('ecb') && questionLower.includes('an toàn')) {
+          explanation += `Chế độ <strong>ECB (Electronic Codebook)</strong> trong AES <strong>không</strong> được đánh giá là an toàn vì các khối dữ liệu giống nhau sẽ cho ra bản mã giống nhau, dễ bị phân tích mẫu. Các chế độ an toàn hơn như CBC, CFB, GCM được khuyến nghị sử dụng. Đáp án đúng: <strong>${treasure}</strong>.`;
+        } else {
+          explanation += `AES <strong>có</strong> hỗ trợ nhiều chế độ mã hóa khác nhau như ECB (Electronic Codebook), CBC (Cipher Block Chaining), CFB (Cipher Feedback), OFB (Output Feedback) và GCM (Galois/Counter Mode). Mỗi chế độ có ưu nhược điểm riêng. Đáp án đúng: <strong>${treasure}</strong>.`;
+        }
+      } else if (questionLower.includes('phần mềm') || questionLower.includes('phần cứng')) {
+        explanation += `AES <strong>có</strong> thể được thực thi hiệu quả trên cả phần mềm lẫn phần cứng. Trên phần cứng, AES có thể được tăng tốc bằng các lệnh chuyên dụng như AES-NI (AES New Instructions) trên CPU hiện đại. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('bỉ') || questionLower.includes('nguồn gốc')) {
+        explanation += `AES <strong>đúng</strong> là có nguồn gốc từ hai nhà mật mã học người Bỉ: Joan Daemen và Vincent Rijmen. Thuật toán của họ được đặt tên là Rijndael và đã chiến thắng trong cuộc thi chọn AES của NIST. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('năm') || questionLower.includes('2001') || questionLower.includes('công bố')) {
+        explanation += `AES được NIST chính thức công bố vào năm <strong>2001</strong> với tên gọi FIPS PUB 197 (Federal Information Processing Standards Publication 197). Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('xor')) {
+        explanation += `Bước AddRoundKey trong AES thực hiện phép toán <strong>XOR</strong> (eXclusive OR) giữa ma trận trạng thái và khóa con. XOR là phép toán bit cơ bản: 1 XOR 1 = 0, 0 XOR 0 = 0, 1 XOR 0 = 1, 0 XOR 1 = 1. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('16 byte') || questionLower.includes('byte')) {
+        explanation += `Một khối dữ liệu AES sau khi mã hóa có kích thước <strong>16 byte</strong> (128 bit), bằng đúng kích thước khối đầu vào. AES là mã hóa khối nên đầu ra luôn có cùng kích thước với đầu vào. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('brute-force') || questionLower.includes('vét cạn') || questionLower.includes('tấn công')) {
+        explanation += `AES <strong>có thể</strong> bị tấn công bằng phương pháp vét cạn (brute-force) về mặt lý thuyết, nhưng với AES-256, không gian khóa là 2²⁵⁶, quá lớn để có thể thực hiện trong thực tế với công nghệ hiện tại. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else {
+        explanation += `Đây là câu hỏi lý thuyết về AES. Câu trả lời đúng là <strong>${treasure}</strong>. Hãy ôn lại kiến thức về các thuật toán mã hóa (AES, RSA) cũng như các khái niệm bảo mật thông tin cơ bản để hiểu rõ hơn về đáp án này.`;
+      }
+    } else if (questionLower.includes('rsa')) {
+      explanation = `<strong>Giải thích:</strong> Câu hỏi này thuộc về kiến thức nền tảng về RSA.<br><br>`;
+      if (questionLower.includes('viết tắt')) {
+        explanation += `RSA là viết tắt của tên ba nhà khoa học: <strong>Rivest</strong> (Ron Rivest), <strong>Shamir</strong> (Adi Shamir) và <strong>Adleman</strong> (Leonard Adleman). Họ đã công bố thuật toán này vào năm 1977. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('đối xứng') || questionLower.includes('bất đối xứng')) {
+        explanation += `RSA là thuật toán mã hóa <strong>bất đối xứng</strong> (asymmetric), sử dụng một cặp khóa: khóa công khai (public key) để mã hóa và khóa bí mật (private key) để giải mã. Điều này khác với AES là mã hóa đối xứng. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('bài toán khó') || questionLower.includes('an toàn')) {
+        explanation += `RSA dựa trên bài toán <strong>phân tích số nguyên tố</strong> (integer factorization). Cụ thể, an toàn của RSA dựa trên độ khó của việc phân tích tích n = p × q thành hai số nguyên tố p và q khi n đủ lớn. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('khóa công khai') || (questionLower.includes('public key') && questionLower.includes('n e'))) {
+        explanation += `Trong RSA, khóa công khai (public key) gồm hai thành phần: <strong>n</strong> (modulus, tích của hai số nguyên tố p và q) và <strong>e</strong> (số mũ công khai, thường chọn là 65537). Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('khóa bí mật') || (questionLower.includes('private key') && questionLower.includes('n d'))) {
+        explanation += `Trong RSA, khóa bí mật (private key) gồm hai thành phần: <strong>n</strong> (modulus, giống với khóa công khai) và <strong>d</strong> (số mũ bí mật, là nghịch đảo modulo của e theo φ(n)). Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('kích thước khóa') || questionLower.includes('bit')) {
+        explanation += `Kích thước khóa RSA tối thiểu được khuyến nghị hiện nay là <strong>2048 bit</strong>. Khóa 1024 bit từng được dùng phổ biến nhưng hiện đã không còn an toàn. Một số tổ chức yêu cầu khóa 4096 bit cho các ứng dụng nhạy cảm. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('ký số') || questionLower.includes('ngoài mã hóa')) {
+        explanation += `Ngoài mã hóa, RSA còn được dùng để tạo <strong>chữ ký số (digital signature)</strong>. Chữ ký số RSA dùng khóa bí mật để ký (sign) và khóa công khai để xác thực (verify). Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('euler') || questionLower.includes('φ')) {
+        explanation += `Hàm Euler φ(n) trong RSA được tính bằng công thức <strong>φ(n) = (p-1)(q-1)</strong>, với p và q là hai số nguyên tố tạo nên n. Hàm này đóng vai trò quan trọng trong việc tính khóa bí mật d. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('giá trị n') || questionLower.includes('tích')) {
+        explanation += `Trong RSA, giá trị <strong>n</strong> (modulus) được tính bằng tích của hai số nguyên tố lớn <strong>p</strong> và <strong>q</strong>: n = p × q. Độ dài của n quyết định kích thước khóa RSA. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('tốc độ') || questionLower.includes('nhanh hơn')) {
+        explanation += `RSA <strong>không</strong> có tốc độ mã hóa nhanh hơn AES. Trên thực tế, RSA chậm hơn rất nhiều so với AES. Đây là lý do RSA thường chỉ dùng để mã hóa khóa phiên (session key), còn dữ liệu lớn được mã hóa bằng AES. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('khóa phiên') || questionLower.includes('loại dữ liệu')) {
+        explanation += `Trong thực tế, RSA thường được dùng để mã hóa <strong>khóa phiên (session key)</strong>. Khóa phiên là một khóa đối xứng (như AES) được tạo ngẫu nhiên, được RSA mã hóa và gửi đến bên nhận. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('điểm yếu')) {
+        explanation += `Điểm yếu chính của RSA so với AES là <strong>tốc độ chậm</strong>. RSA chậm hơn AES hàng trăm đến hàng nghìn lần do phải thực hiện các phép tính lũy thừa modulo với số lớn. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('phân tích thừa số') || questionLower.includes('tấn công')) {
+        explanation += `RSA có thể bị tấn công bằng phương pháp <strong>phân tích thừa số (factoring)</strong> nếu khóa không đủ lớn. Kẻ tấn công có thể phân tích n thành p × q để tính khóa bí mật d. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('giá trị gần nhau') || questionLower.includes('p và q')) {
+        explanation += `Hai số nguyên tố p và q trong RSA <strong>không</strong> nên được chọn có giá trị gần nhau. Nếu p và q gần nhau, kẻ tấn công có thể dùng phương pháp Fermat factorization để phân tích n dễ dàng hơn. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('cùng một khóa')) {
+        explanation += `RSA <strong>không</strong> sử dụng cùng một khóa cho cả mã hóa và giải mã. Đây là mã hóa bất đối xứng, dùng khóa công khai (public key) để mã hóa và khóa bí mật (private key) để giải mã. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('giá trị e') || questionLower.includes('số nguyên tố nào') || questionLower.includes('65537')) {
+        explanation += `Giá trị <strong>e</strong> (số mũ công khai) trong RSA thường được chọn là <strong>65537</strong> (hay 2¹⁶ + 1). Đây là số nguyên tố nhỏ có trọng số Hamming thấp, giúp tối ưu tốc độ mã hóa. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('lượng tử') || questionLower.includes('quantum')) {
+        explanation += `RSA <strong>không</strong> an toàn trước các cuộc tấn công bằng máy tính lượng tử. Thuật toán Shor có thể phân tích n thành p × q một cách hiệu quả trên máy tính lượng tử, phá vỡ hoàn toàn RSA. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('ứng dụng') || questionLower.includes('giao thức') || questionLower.includes('internet')) {
+        explanation += `RSA thường được ứng dụng trong các giao thức bảo mật trên Internet như <strong>SSL/TLS</strong> (để thiết lập kết nối HTTPS an toàn), cũng như trong SSH, PGP, và chữ ký số. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('kích thước tối đa') || questionLower.includes('chỉ có thể')) {
+        explanation += `RSA chỉ có thể mã hóa dữ liệu có kích thước tối đa bằng <strong>độ dài khóa</strong> (key length). Ví dụ, với khóa RSA 2048 bit, dữ liệu tối đa là ≈ 2048 bit (256 byte). Dữ liệu lớn hơn cần được mã hóa bằng AES kết hợp với RSA. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('bắt đầu') || questionLower.includes('quy trình tạo')) {
+        explanation += `Quy trình tạo khóa RSA bắt đầu bằng việc chọn hai <strong>số nguyên tố</strong> lớn p và q. Sau đó tính n = p × q và φ(n) = (p-1)(q-1). Cuối cùng chọn e và tính d sao cho e × d ≡ 1 (mod φ(n)). Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('giá trị d') || questionLower.includes('nghịch đảo modulo')) {
+        explanation += `Giá trị <strong>d</strong> trong RSA được tính bằng phép toán <strong>nghịch đảo modulo</strong> (modular inverse): d = e⁻¹ mod φ(n), nghĩa là d là số thỏa mãn e × d ≡ 1 (mod φ(n)). Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('man-in-the-middle') || questionLower.includes('mitm')) {
+        explanation += `RSA <strong>có thể</strong> chống lại tấn công man-in-the-middle (MITM) nếu được triển khai đúng với hạ tầng khóa công khai (PKI) và chứng thực số (digital certificate). Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('ký') && questionLower.includes('sign')) {
+        explanation += `Chữ ký số RSA dùng <strong>khóa bí mật (private key)</strong> để ký (sign). Người gửi dùng khóa bí mật của mình để ký lên dữ liệu, tạo ra chữ ký số. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('xác thực') || (questionLower.includes('verify'))) {
+        explanation += `Chữ ký số RSA dùng <strong>khóa công khai (public key)</strong> để xác thực (verify). Bất kỳ ai cũng có thể dùng khóa công khai của người ký để kiểm tra tính hợp lệ của chữ ký. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('trao đổi khóa')) {
+        explanation += `RSA <strong>không</strong> cần phải trao đổi khóa trước khi truyền tin. Trong mã hóa bất đối xứng, khóa công khai có thể được công bố công khai, và bất kỳ ai cũng có thể dùng nó để mã hóa dữ liệu gửi cho người sở hữu khóa bí mật. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('kết hợp')) {
+        explanation += `RSA thường được kết hợp với <strong>AES</strong> để mã hóa dữ liệu có kích thước lớn. RSA dùng để mã hóa khóa phiên (session key), và AES dùng để mã hóa dữ liệu thực tế với khóa phiên đó. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('năm') || questionLower.includes('1977') || questionLower.includes('công bố')) {
+        explanation += `Thuật toán RSA được công bố lần đầu vào năm <strong>1977</strong> bởi Rivest, Shamir và Adleman. Tuy nhiên, trước đó vào năm 1973, Clifford Cocks tại GCHQ đã phát minh ra một thuật toán tương tự nhưng không được công bố. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('biết') || questionLower.includes('tính được') || questionLower.includes('p và q')) {
+        explanation += `Nếu biết được hai số nguyên tố p và q, <strong>chắc chắn có thể</strong> tính được khóa bí mật RSA. Khi biết p và q, ta tính được φ(n) = (p-1)(q-1), và từ đó tính d = e⁻¹ mod φ(n). Đây là lý do RSA yêu cầu giữ bí mật p và q. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else if (questionLower.includes('công khai') || questionLower.includes('public-key')) {
+        explanation += `RSA <strong>đúng</strong> là thuộc loại mã hóa khóa công khai (public-key cryptography) hay còn gọi là mã hóa bất đối xứng. Đây là một trong những hệ thống mã hóa khóa công khai đầu tiên và phổ biến nhất. Đáp án đúng: <strong>${treasure}</strong>.`;
+      } else {
+        explanation += `Đây là câu hỏi lý thuyết về RSA. Câu trả lời đúng là <strong>${treasure}</strong>. Hãy ôn lại kiến thức về các thuật toán mã hóa (AES, RSA) cũng như các khái niệm bảo mật thông tin cơ bản để hiểu rõ hơn về đáp án này.`;
+      }
+    } else {
+      explanation = `Đây là câu hỏi lý thuyết về mật mã học. Câu trả lời đúng là <strong>${treasure}</strong>. Hãy ôn lại kiến thức về các thuật toán mã hóa (AES, RSA) cũng như các khái niệm bảo mật thông tin cơ bản để hiểu rõ hơn về đáp án này.`;
+    }
   }
 
   lastPuzzleExplanation = explanation;

@@ -185,23 +185,12 @@
           "treasure": "replay attack",
           "cipher_type": "vuln",
           "vuln_type": "replay",
+          "note": "Manh mối: Một câu thần chú mở cửa được đọc đúng vào hôm qua. Hôm nay, ngươi không biết câu thần chú đó, nhưng ngươi có một cuộn giấy ghi lại âm thanh. Ngươi mở cuộn giấy đó ra, phát lại âm thanh cũ, và cánh cửa vẫn mặc nhiên mở ra dù ngươi chưa từng thuộc câu thần chú.",
           "vuln_answers": [
             "replay",
             "replay attack",
             "replay-attack"
           ]
-        },
-        {
-          "question": "Người giữ lăng mộ có để lại dấu hiệu nào cho ngươi nhận ra bản ghi còn nguyên? (câu hỏi kĩ thuật: liệu dữ liệu này có bị thay đổi không?)",
-          "treasure": "intact",
-          "cipher_type": "hash",
-          "note": "message=\"Seal check\",hash=sha256"
-        },
-        {
-          "question": "Dòng chữ bị xóa trên bia đá có phải là dấu hiệu của một cuộc cướp phá? (câu hỏi kĩ thuật: liệu dữ liệu này có bị thay đổi không?)",
-          "treasure": "tampered",
-          "cipher_type": "hash",
-          "note": "message=\"Broken seal\",hash=sha256"
         },
         {
           "question": "Ngươi có thể nghe thấy tiếng gỗ cũ kêu trong mộ không?",
@@ -213,6 +202,7 @@
           "treasure": "opened",
           "cipher_type": "vuln",
           "vuln_type": "replay",
+          "note": "Manh mối: Ngươi tìm thấy một sợi dây được buộc vào cánh cửa đá từ bên ngoài. Hình như ai đó đã kéo sợi dây này để mở cửa từ xa. Ngươi cũng kéo sợi dây y hệt như vậy, và cánh cửa mở ra — mặc dù ngươi không có chìa khóa. Hành động kéo dây đã được thực hiện lại giống hệt lần trước.",
           "vuln_answers": [
             "opened",
             "open",
@@ -220,10 +210,10 @@
           ]
         },
         {
-          "question": "Lời thề trên tấm bia có bị người khác sửa lại trong bóng tối không? (câu hỏi kĩ thuật: liệu dữ liệu này có bị thay đổi không?)",
-          "treasure": "altered",
+          "question": "Dấu vết cũ trên tường có phải là do thời gian ăn mòn không? (câu hỏi kĩ thuật: liệu dữ liệu này có bị thay đổi không?)",
+          "treasure": "ok",
           "cipher_type": "hash",
-          "note": "message=\"Altered text\",hash=sha256"
+          "note": "message=\"Erosion note\",hash=sha256"
         },
         {
           "question": "Một tiếng động lạ trong lòng đất có phải là dấu hiệu cảnh báo?",
@@ -235,6 +225,7 @@
           "treasure": "replay",
           "cipher_type": "vuln",
           "vuln_type": "replay",
+          "note": "Manh mối: Người canh gác thường gõ ba nhịp lên cột đá trước khi mở cửa. Kẻ trộm mộ đã quan sát và nhớ được điều đó. Hắn đến trước cột đá, gõ ba nhịp giống hệt, và cánh cửa mở ra dù hắn không phải người canh gác. Tín hiệu cũ được dùng lại y nguyên.",
           "vuln_answers": [
             "replay",
             "replay attack",
@@ -242,10 +233,10 @@
           ]
         },
         {
-          "question": "Bản ghi bị chèn thêm một dòng chữ nào đó trong đêm? (câu hỏi kĩ thuật: liệu dữ liệu này có bị thay đổi không?)",
-          "treasure": "forged",
+          "question": "Lời thề trên tấm bia có bị người khác sửa lại trong bóng tối không? (câu hỏi kĩ thuật: liệu dữ liệu này có bị thay đổi không?)",
+          "treasure": "tampered",
           "cipher_type": "hash",
-          "note": "message=\"Forged line\",hash=sha256"
+          "note": "message=\"Altered text\",hash=sha256"
         },
         {
           "question": "Con đường cho người đi qua có bị những dấu chân lạ nhấn lên không?",
@@ -257,6 +248,7 @@
           "treasure": "reuse",
           "cipher_type": "vuln",
           "vuln_type": "replay",
+          "note": "Manh mối: Mỗi người giữ cửa đều có một chiếc chìa khóa riêng và phải trả lại vào cuối ca. Hôm nay, ngươi thấy một người dùng chiếc chìa khóa của người hôm qua để mở cửa, dù chìa khóa đó đáng lẽ đã được đổi mới.",
           "vuln_answers": [
             "reuse",
             "reused",
@@ -264,10 +256,10 @@
           ]
         },
         {
-          "question": "Tấm bản đồ cũ có thể đã bị đổi chỗ từ lúc đầu không? (câu hỏi kĩ thuật: liệu dữ liệu này có bị thay đổi không?)",
-          "treasure": "moved",
+          "question": "Bản ghi bị chèn thêm một dòng chữ nào đó trong đêm? (câu hỏi kĩ thuật: liệu dữ liệu này có bị thay đổi không?)",
+          "treasure": "tampered",
           "cipher_type": "hash",
-          "note": "message=\"Shifted map\",hash=sha256"
+          "note": "message=\"Forged line\",hash=sha256"
         },
         {
           "question": "Một khung cửa đá đang mở hé có báo trước điều gì?",
@@ -279,6 +271,7 @@
           "treasure": "trap",
           "cipher_type": "vuln",
           "vuln_type": "replay",
+          "note": "Manh mối: Nghe nói có một câu thần chú đặc biệt có thể mở cánh cửa đồng. Ngươi thấy ai đó đang đọc to câu thần chú đó. Ngươi ghi nhớ nó. Sau đó, ngươi cũng đọc lại y nguyên từng chữ, và cánh cửa mở ra — nhưng ngươi không hề biết câu thần chú đó có nghĩa là gì, chỉ đơn giản là lặp lại nó.",
           "vuln_answers": [
             "trap",
             "bait",
@@ -286,10 +279,10 @@
           ]
         },
         {
-          "question": "Dấu vết cũ trên tường có phải là do thời gian ăn mòn không? (câu hỏi kĩ thuật: liệu dữ liệu này có bị thay đổi không?)",
-          "treasure": "erosion",
+          "question": "Người giữ lăng mộ có để lại dấu hiệu nào cho ngươi nhận ra bản ghi còn nguyên? (câu hỏi kĩ thuật: liệu dữ liệu này có bị thay đổi không?)",
+          "treasure": "ok",
           "cipher_type": "hash",
-          "note": "message=\"Erosion note\",hash=sha256"
+          "note": "message=\"Seal check\",hash=sha256"
         },
         {
           "question": "Ngươi có thấy một con đường vòng được đánh dấu sai không?",
@@ -301,6 +294,7 @@
           "treasure": "repeat",
           "cipher_type": "vuln",
           "vuln_type": "replay",
+          "note": "Manh mối: Ngươi gửi một bức thư xin phép qua cửa sổ nhỏ. Lính gác nhận thư và cho phép vào. Ngươi nhận ra rằng nếu ngươi sao chép y hệt bức thư đó và gửi lại lần nữa, lính gác vẫn cho phép vào — dù bức thư chỉ là bản sao của bức cũ.",
           "vuln_answers": [
             "repeat",
             "replay",
@@ -309,7 +303,7 @@
         },
         {
           "question": "Lời hứa cổ xưa có bị đổi thành lời nguyền không? (câu hỏi kĩ thuật: liệu dữ liệu này có bị thay đổi không?)",
-          "treasure": "cursed",
+          "treasure": "tampered",
           "cipher_type": "hash",
           "note": "message=\"Cursed promise\",hash=sha256"
         },
@@ -323,6 +317,7 @@
           "treasure": "mimic",
           "cipher_type": "vuln",
           "vuln_type": "replay",
+          "note": "Manh mối: Mỗi người giữ kho báu có một tiếng còi riêng để gọi người mở cửa. Ngươi thấy một người lạ huýt sáo đúng giai điệu mà người giữ kho đã huýt hôm qua. Hắn không biết tiếng còi đó có nghĩa gì, chỉ làm lại y hệt giai điệu cũ.",
           "vuln_answers": [
             "mimic",
             "replay",
@@ -331,7 +326,7 @@
         },
         {
           "question": "Lời ghi chép cuối cùng có bị ghép thêm một phần nào không? (câu hỏi kĩ thuật: liệu dữ liệu này có bị thay đổi không?)",
-          "treasure": "appended",
+          "treasure": "tampered",
           "cipher_type": "hash",
           "note": "message=\"Appended text\",hash=sha256"
         },
@@ -345,6 +340,7 @@
           "treasure": "intercept",
           "cipher_type": "vuln",
           "vuln_type": "replay",
+          "note": "Manh mối: Một con chim bồ câu đưa thư mang mật lệnh từ tướng quân. Kẻ địch bắt được con chim, đọc mật lệnh, rồi thả nó đi. Sau đó, hắn bắt một con chim khác và gửi đi một bức thư có nội dung y hệt mật lệnh cũ — khiến quân lính của ngươi làm theo lệnh của hắn dù bức thư chỉ là bản sao.",
           "vuln_answers": [
             "intercept",
             "replay",
@@ -352,10 +348,10 @@
           ]
         },
         {
-          "question": "Bản ghi cũ có vẫn giữ được lời hứa ban đầu không? (câu hỏi kĩ thuật: liệu dữ liệu này có bị thay đổi không?)",
-          "treasure": "preserved",
+          "question": "Dòng chữ bị xóa trên bia đá có phải là dấu hiệu của một cuộc cướp phá? (câu hỏi kĩ thuật: liệu dữ liệu này có bị thay đổi không?)",
+          "treasure": "tampered",
           "cipher_type": "hash",
-          "note": "message=\"Preserved note\",hash=sha256"
+          "note": "message=\"Broken seal\",hash=sha256"
         },
         {
           "question": "Một lối đi khác nhau trong đêm có thể là bẫy không?",
@@ -363,10 +359,22 @@
           "cipher_type": "caesar"
         },
         {
+          "question": "Tấm bản đồ cũ có thể đã bị đổi chỗ từ lúc đầu không? (câu hỏi kĩ thuật: liệu dữ liệu này có bị thay đổi không?)",
+          "treasure": "tampered",
+          "cipher_type": "hash",
+          "note": "message=\"Shifted map\",hash=sha256"
+        },
+        {
           "question": "Lời ghi trên bức tường có bị ai sửa đổi trong đêm không? (câu hỏi kĩ thuật: liệu dữ liệu này có bị thay đổi không?)",
-          "treasure": "scratched",
+          "treasure": "tampered",
           "cipher_type": "hash",
           "note": "message=\"Scratched wall\",hash=sha256"
+        },
+        {
+          "question": "Bản ghi cũ có vẫn giữ được lời hứa ban đầu không? (câu hỏi kĩ thuật: liệu dữ liệu này có bị thay đổi không?)",
+          "treasure": "ok",
+          "cipher_type": "hash",
+          "note": "message=\"Preserved note\",hash=sha256"
         }
       ]
     },
@@ -695,9 +703,9 @@
           ]
         },
         {
-          "question": "Mật mã cổ xưa có thể sống sót qua bao nhiêu thế kỷ? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "centuries",
-          "cipher_type": "aes"
+          "question": "Trong AES, bốn bước chính của một vòng mã hóa là gì? (Câu hỏi lý thuyết về AES)",
+          "treasure": "subbytes shiftrows mixcolumns addroundkey",
+          "cipher_type": "theory"
         },
         {
           "question": "Câu thần chú cuối cùng bị lặp lại sai cách như thế nào? (câu hỏi kĩ thuật: điểm yếu nào đang bị khai thác?)",
@@ -722,9 +730,9 @@
           ]
         },
         {
-          "question": "Mật mã cuối cùng còn lưu giữ ký ức của bao nhiêu đời? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "epochs",
-          "cipher_type": "aes"
+          "question": "Mật mã hóa khối (block cipher) mã hóa dữ liệu theo đơn vị nào? (Câu hỏi lý thuyết về AES)",
+          "treasure": "khối",
+          "cipher_type": "theory"
         },
         {
           "question": "Một câu hỏi cũ được gửi lại nhiều lần như thể có ai đó đang cố thử lại? (câu hỏi kĩ thuật: điểm yếu nào đang bị khai thác?)",
@@ -738,9 +746,9 @@
           ]
         },
         {
-          "question": "Bức tượng đá cuối cùng giữ gì trong lòng tim mình? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "memory",
-          "cipher_type": "aes"
+          "question": "Trong quá trình giải mã AES, các bước được thực hiện theo thứ tự như thế nào so với mã hóa? (Câu hỏi lý thuyết về AES)",
+          "treasure": "ngược lại",
+          "cipher_type": "theory"
         },
         {
           "question": "Người xưa có lặp lại cùng một lỗi cũ trong lời nguyền không? (câu hỏi kĩ thuật: điểm yếu nào đang bị khai thác?)",
@@ -765,9 +773,9 @@
           ]
         },
         {
-          "question": "Mật mã này có thể vượt qua bao nhiêu mùa trôi? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "seasons",
-          "cipher_type": "aes"
+          "question": "Bảng S-box trong AES có chức năng gì? (Câu hỏi lý thuyết về AES)",
+          "treasure": "thay thế byte",
+          "cipher_type": "theory"
         },
         {
           "question": "Ngươi có nghe thấy tiếng gọi lặp lại từ lòng đất không? (câu hỏi kĩ thuật: điểm yếu nào đang bị khai thác?)",
@@ -781,14 +789,14 @@
           ]
         },
         {
-          "question": "Một ký ức cổ xưa vẫn còn được mã hóa trong đá? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "legacy",
-          "cipher_type": "aes"
+          "question": "AES có thể được sử dụng để mã hóa dữ liệu có kích thước không phải bội số của 128 bit không? (Câu hỏi lý thuyết về AES)",
+          "treasure": "có",
+          "cipher_type": "theory"
         },
         {
-          "question": "Mật mã cũ còn được giữ trong lòng một viên đá nào? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "stone",
-          "cipher_type": "aes"
+          "question": "DES có kích thước khóa bao nhiêu bit? (Câu hỏi lý thuyết về AES - so sánh với DES)",
+          "treasure": "56",
+          "cipher_type": "theory"
         },
         {
           "question": "Một lời hứa không có lớp bảo vệ sẽ dễ bị ai xâm phạm phải không? (câu hỏi kĩ thuật: điểm yếu nào đang bị khai thác?)",
@@ -802,14 +810,14 @@
           ]
         },
         {
-          "question": "Mật mã này có thể cư trú qua bao nhiêu năm tháng? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "years",
-          "cipher_type": "aes"
+          "question": "AES sử dụng trường GF(2⁸) trong bước nào? (Câu hỏi lý thuyết về AES)",
+          "treasure": "mixcolumns",
+          "cipher_type": "theory"
         },
         {
-          "question": "Bản ghi cuối cùng còn giữ được ký ức của bao nhiêu thế hệ? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "generations",
-          "cipher_type": "aes"
+          "question": "Trong AES, mỗi byte trong ma trận trạng thái được biểu diễn dưới dạng gì? (Câu hỏi lý thuyết về AES)",
+          "treasure": "số hexa",
+          "cipher_type": "theory"
         },
         {
           "question": "Nếu thiếu lớp bảo vệ, lời thề có thể bị ai xâm phạm không? (câu hỏi kĩ thuật: điểm yếu nào đang bị khai thác?)",
@@ -823,14 +831,14 @@
           ]
         },
         {
-          "question": "Mật mã này có thể tồn tại qua bao nhiêu thế kỷ? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "centuries",
-          "cipher_type": "aes"
+          "question": "AES-NI là tập lệnh mở rộng dùng để làm gì? (Câu hỏi lý thuyết về AES)",
+          "treasure": "tăng tốc aes",
+          "cipher_type": "theory"
         },
         {
-          "question": "Mật mã cổ xưa vẫn còn giữ được lời hứa của thời gian không? (câu hỏi kĩ thuật: thứ gì đang được bảo vệ bằng mã hóa này?)",
-          "treasure": "timeless",
-          "cipher_type": "aes"
+          "question": "Mật mã hóa dòng (stream cipher) khác gì với mã hóa khối? (Câu hỏi lý thuyết về AES)",
+          "treasure": "xử lý từng byte",
+          "cipher_type": "theory"
         }
       ]
     }
