@@ -3,11 +3,12 @@
 
 > **Môn học:** An toàn và Bảo mật Thông tin  
 > **Trường:** Đại học Đại Nam  
-> **Giảng viên hướng dẫn:** TS. Trần Đăng Công  
+> **Giảng viên hướng dẫn:** ThS. Lê Thị Thùy Trang  
 > **Nhóm thực hiện – Nhóm 12:**  
-> - Lương Quốc Diệu
-> - Đào Duy Mạnh
-> - Lã Việt Hoàng
+> - Nguyễn Việt Hoàng
+> - Cao Minh Hưng
+> - Mạc Đức Thắng
+> - Lê Hoàng Nam
 
 ---
 
