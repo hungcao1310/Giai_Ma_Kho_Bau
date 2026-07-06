@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('Không thể phát nhạc trong game:', error);
     }
   };
-  
+
   // Hiển thị leaderboard khi trang load
   displayLeaderboard();
 
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     homeScreen.addEventListener('touchstart', retryThemeSong, { passive: true });
   }
 
-  
+
   if (startBtn) {
     startBtn.addEventListener('click', () => {
       suppressThemePlay = true;
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showGameFeedback('✅ Tiến trình đã được lưu');
     });
   }
-  
+
   if (homeBtn) {
     homeBtn.addEventListener('click', () => {
       if (ingameSong) {
@@ -154,38 +154,38 @@ document.addEventListener('DOMContentLoaded', () => {
       location.reload(); // Reload trang để về màn hình chủ
     });
   }
-  
+
   if (introBtn) {
     introBtn.addEventListener('click', () => {
       document.getElementById('intro-screen').classList.add('show');
     });
   }
-  
+
   if (closeIntroBtn) {
     closeIntroBtn.addEventListener('click', () => {
       document.getElementById('intro-screen').classList.remove('show');
     });
   }
-  
+
   if (saveNameBtn) {
     saveNameBtn.addEventListener('click', savePlayerName);
   }
-  
+
   if (skipNameBtn) {
     skipNameBtn.addEventListener('click', skipPlayerName);
   }
-  
+
   if (leaderboardBtn) {
     leaderboardBtn.addEventListener('click', () => {
       document.getElementById('leaderboard').classList.add('show');
       leaderboardOverlay.classList.add('show');
     });
   }
-  
+
   if (closeLeaderboardBtn) {
     closeLeaderboardBtn.addEventListener('click', closeLeaderboard);
   }
-  
+
   if (leaderboardOverlay) {
     leaderboardOverlay.addEventListener('click', closeLeaderboard);
   }
@@ -254,15 +254,15 @@ function getLeaderboard() {
 // Lưu kết quả mới vào bảng xếp hạng nếu tên người chơi chưa tồn tại.
 function saveScore(playerName, score, timeMs) {
   let leaderboard = getLeaderboard();
-  
+
   // Kiểm tra xem tên này đã tồn tại chưa
   if (leaderboard.some(entry => entry.name === playerName)) {
     return false; // Tên trùng, không lưu
   }
-  
+
   let timeStr = formatTime(timeMs);
   leaderboard.push({ name: playerName, score: score, time: timeStr, timeMs: timeMs });
-  
+
   // Sắp xếp theo điểm giảm dần, nếu bằng thì theo thời gian tăng dần (nhanh nhất trước)
   leaderboard.sort((a, b) => {
     if (b.score !== a.score) {
@@ -270,7 +270,7 @@ function saveScore(playerName, score, timeMs) {
     }
     return a.timeMs - b.timeMs; // Cùng điểm thì thời gian nhanh hơn được top
   });
-  
+
   // Chỉ giữ top 20
   leaderboard = leaderboard.slice(0, 20);
   localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
@@ -280,16 +280,16 @@ function saveScore(playerName, score, timeMs) {
 function displayLeaderboard() {
   const leaderboard = getLeaderboard();
   const tbody = document.getElementById('leaderboard-body');
-  
+
   if (!tbody) return;
-  
+
   tbody.innerHTML = '';
-  
+
   if (leaderboard.length === 0) {
     tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Chưa có điểm nào</td></tr>';
     return;
   }
-  
+
   leaderboard.forEach((entry, index) => {
     const row = document.createElement('tr');
     row.innerHTML = `
@@ -306,15 +306,15 @@ function displayLeaderboard() {
 function savePlayerName() {
   const nameInput = document.getElementById('player-name-input');
   let playerName = nameInput.value.trim();
-  
+
   if (!playerName) {
     playerCount++;
     playerName = 'Player' + playerCount;
     localStorage.setItem('playerCount', playerCount);
   }
-  
+
   let elapsedTime = Date.now() - startTime;
-  
+
   // Kiểm tra xem tên có trùng không
   if (!saveScore(playerName, score, elapsedTime)) {
     alert('❌ Tên "' + playerName + '" đã tồn tại! Vui lòng nhập tên khác.');
@@ -322,9 +322,9 @@ function savePlayerName() {
     nameInput.select();
     return; // Không lưu, yêu cầu nhập lại
   }
-  
+
   document.getElementById('name-input-screen').classList.remove('show');
-  
+
   // Hiển thị leaderboard sau khi lưu
   setTimeout(() => {
     location.reload();
@@ -336,12 +336,12 @@ function skipPlayerName() {
   playerCount++;
   let playerName = 'Player' + playerCount;
   localStorage.setItem('playerCount', playerCount);
-  
+
   let elapsedTime = Date.now() - startTime;
-  
+
   saveScore(playerName, score, elapsedTime);
   document.getElementById('name-input-screen').classList.remove('show');
-  
+
   // Hiển thị leaderboard sau khi lưu
   setTimeout(() => {
     location.reload();
@@ -380,7 +380,7 @@ let startPositions = {};
 let suppressThemePlay = false;
 let score = 0;
 let levelScore = 0;
-let currentPuzzles = []; 
+let currentPuzzles = [];
 let currentPuzzle = {};
 let pendingPuzzles = [];
 let puzzles = [];
@@ -407,7 +407,7 @@ function getAudioContext() {
     }
   }
   if (audioContext && audioContext.state === 'suspended') {
-    audioContext.resume().catch(() => {});
+    audioContext.resume().catch(() => { });
   }
   return audioContext;
 }
@@ -421,7 +421,7 @@ function playMummyBiteSound() {
   if (!mummyBiteSound) return;
   mummyBiteSound.currentTime = 0;
   mummyBiteSound.volume = 0.5;
-  mummyBiteSound.play().catch(() => {});
+  mummyBiteSound.play().catch(() => { });
 }
 
 function playLavaBurnSound() {
@@ -429,7 +429,7 @@ function playLavaBurnSound() {
   if (!lavaBurnSound) return;
   lavaBurnSound.currentTime = 0;
   lavaBurnSound.volume = 0.5;
-  lavaBurnSound.play().catch(() => {});
+  lavaBurnSound.play().catch(() => { });
 }
 
 // ==================== Module 4: Tải bản đồ, ảnh và dữ liệu câu đố ====================
@@ -681,7 +681,7 @@ function drawMap() {
           imageMode(CORNER);
           image(wallImage, posX, posY, tileSize, tileSize);
         } else {
-          fill(139, 69, 19); 
+          fill(139, 69, 19);
           rect(posX, posY, tileSize, tileSize);
         }
       } else if (grid[y][x] === 'P' || grid[y][x] === 'G') {
@@ -704,7 +704,7 @@ function drawMap() {
           imageMode(CORNER);
           image(lavaImage, posX, posY, tileSize, tileSize);
         } else {
-          fill(255, 215, 0); 
+          fill(255, 215, 0);
           rect(posX, posY, tileSize, tileSize);
         }
       } else if (grid[y][x] === 'T') {
@@ -720,7 +720,7 @@ function drawMap() {
           imageMode(CORNER);
           image(stairImage, posX, posY, tileSize, tileSize);
         } else {
-          fill(105, 105, 105); 
+          fill(105, 105, 105);
           rect(posX, posY, tileSize, tileSize);
         }
       }
@@ -942,7 +942,7 @@ function keyPressed() {
           footstepsSound.volume = 0.4;
           const playPromise = footstepsSound.play();
           if (playPromise && typeof playPromise.catch === 'function') {
-            playPromise.catch(() => {});
+            playPromise.catch(() => { });
           }
         } catch (error) {
           // Ignore if browser blocks autoplay or audio is not ready.
@@ -1049,7 +1049,7 @@ function teleportPlayer() {
       teleportSound.volume = 0.5;
       const playPromise = teleportSound.play();
       if (playPromise && typeof playPromise.catch === 'function') {
-        playPromise.catch(() => {});
+        playPromise.catch(() => { });
       }
     } catch (error) {
       // Ignore autoplay restrictions or playback errors.
@@ -1123,7 +1123,7 @@ function checkCollisions() {
     if (level < 5) {
       level++;
       levelScore = 0;
-      currentPuzzles = []; 
+      currentPuzzles = [];
       pendingPuzzles = [];
       currentPuzzle = {};
       initMap(level);
@@ -1359,6 +1359,7 @@ decodeScreen.innerHTML = `
 document.body.appendChild(decodeScreen);
 decodeScreen.style.display = 'none';
 
+// ==================== Module 6.1: Tạo và hiển thị popup giải mã ====================
 // Hiển thị popup câu đố và tạo chuỗi mã hóa tương ứng với loại cipher đang dùng.
 function showDecodeScreen() {
   if (decodeScreen.style.display === 'block') return;
@@ -1455,6 +1456,7 @@ function showDecodeScreen() {
   })();
 }
 
+// ==================== Module 6.2: Ẩn và làm mới popup giải mã ====================
 // Ẩn popup câu đố và reset ô nhập để người chơi có thể tiếp tục di chuyển.
 function hideDecodeScreen() {
   decodeScreen.style.display = 'none';
@@ -1468,6 +1470,7 @@ function hideDecodeScreen() {
   window.focus();
 }
 
+// ==================== Module 6.3: Hỗ trợ hiển thị khóa và xử lý giải thích ====================
 function escapeHtml(text) {
   return text.replace(/[&<>"']/g, ch => ({
     '&': '&amp;',
@@ -1527,6 +1530,7 @@ function getVulnHint(vulnType) {
   return hints[vulnType] || 'Nhập tên lỗ hổng phù hợp với nội dung câu hỏi.';
 }
 
+// ==================== Module 6.4: Câu hỏi đặc biệt map 5 ====================
 // Tạo và hiển thị màn hình câu hỏi đặc biệt cho map 5.
 function showSpecialQuestionScreen() {
   specialQuestionActive = true;
@@ -1597,6 +1601,7 @@ function finishSpecialMap5() {
   showCompleteScreen();
 }
 
+// ==================== Module 6.5: Hủy và reset trạng thái giải mã ====================
 // Hủy lời giải câu đố: đưa người chơi quay lại vị trí cũ và trả câu đố về hàng chờ.
 function cancelDecodeScreen() {
   if (currentPuzzle && currentPuzzle.pending) {
@@ -1683,6 +1688,7 @@ function submitDecode() {
   setTimeout(() => feedback.style.display = 'none', 2000);
 }
 
+// ==================== Module 6.6: Xác nhận và kiểm tra giải mã ====================
 // Save/load progress
 function serializePuzzle(puzzle) {
   if (!puzzle) return null;
@@ -1755,6 +1761,7 @@ function clearProgress() {
   }
 }
 
+// ==================== Module 6.7: Lưu và tải tiến độ trò chơi ====================
 function applySavedProgress(saved) {
   if (!saved) return;
   level = saved.level || initialLevel;
@@ -1849,6 +1856,7 @@ async function sha256Hex(message) {
   return (hash >>> 0).toString(16);
 }
 
+// ==================== Module 6.8: Mã hóa và băm hỗ trợ câu đố ====================
 function rsaEncode(text) {
   return text.toLowerCase().split('').map(char => {
     if (char.match(/[a-z]/)) {
@@ -1882,6 +1890,7 @@ function aesEncode(text, key) {
 }
 
 // ==================== Module 7: Tiện ích và màn hình kết thúc ====================
+// ==================== Module 7.1: Tiện ích chung ====================
 function resetPuzzles() {
   levelScore = 0;
   currentPuzzles = puzzles[level - 1].puzzles.map(p => ({ ...p }));
@@ -1896,6 +1905,7 @@ function formatTime(milliseconds) {
   return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
 }
 
+// ==================== Module 7.2: Reset trạng thái và chơi lại ====================
 function resetGameState() {
   score = 0;
   levelScore = 0;
@@ -1960,13 +1970,14 @@ function resetGameState() {
 function restartGame() {
   if (ingameSong) {
     ingameSong.currentTime = 0;
-    ingameSong.play().catch(() => {});
+    ingameSong.play().catch(() => { });
   }
   // Quay về map khởi đầu khi chơi lại
   level = initialLevel;
   resetGameState();
 }
 
+// ==================== Module 7.3: Màn hình hoàn thành ====================
 // Hiển thị màn hình hoàn thành trò chơi và cho phép người chơi nhập tên.
 function showCompleteScreen() {
   savedProgressToResume = null;
@@ -1974,21 +1985,22 @@ function showCompleteScreen() {
 
   let elapsedTime = Date.now() - startTime;
   let timeStr = formatTime(elapsedTime);
-  
+
   // Hiển thị thông tin trong dialog nhập tên
   document.getElementById('completion-stats').innerText = `Thời gian: ${timeStr} | Tổng điểm: ${score}`;
-  
+
   // Hiển thị dialog nhập tên người chơi
   document.getElementById('name-input-screen').classList.add('show');
   document.getElementById('player-name-input').value = '';
   document.getElementById('player-name-input').focus();
 }
 
+// ==================== Module 7.4: Màn hình thua cuộc ====================
 // Hiển thị màn hình thua và báo lại thời gian cũng như điểm số đạt được.
 function showLostScreen() {
   clearProgress();
   let lostScreen = document.getElementById('lost-screen');
-  
+
   // Tạo element nếu chưa tồn tại
   if (!lostScreen) {
     lostScreen = document.createElement('div');
@@ -2042,7 +2054,7 @@ function showLostScreen() {
       </div>
     `;
     document.body.appendChild(lostScreen);
-    
+
     // Thêm event listener cho nút chơi lại và về trang chủ
     document.getElementById('retry-btn-lost').addEventListener('click', () => {
       restartGame();
@@ -2051,7 +2063,7 @@ function showLostScreen() {
       location.reload();
     });
   }
-  
+
   const lostReason = document.getElementById('lost-reason');
   if (lostReason) {
     lostReason.innerText = gameOverReason === 'lava'
@@ -2063,6 +2075,6 @@ function showLostScreen() {
   let elapsedTime = Date.now() - startTime;
   let timeStr = formatTime(elapsedTime);
   document.getElementById('lost-stats').innerText = `Thời gian chơi: ${timeStr} | Điểm số: ${score}`;
-  
+
   lostScreen.style.display = 'flex';
 }
